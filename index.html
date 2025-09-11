@@ -12,181 +12,488 @@
       background:linear-gradient(135deg,#0052FF 0%,#0052FF 100%);
       min-height:100vh;overflow-x:hidden
     }
-    .container{max-width:1600px;margin:0 auto;
-      padding:0 50px
-      /* padding: 2rem; */
+    .container{
+      max-width:1600px;
+      margin:0 auto;
+      padding:0 2rem;
     }
 
     /* Header & Navigation */
     header{
-      background:rgba(0, 64, 255, 0.1);backdrop-filter:blur(10px);
-      padding:1rem 0;position:fixed;width:100%;top:0;z-index:1000
+      background:rgba(0, 64, 255, 0.1);
+      backdrop-filter:blur(10px);
+      padding:1rem 0;
+      position:fixed;
+      width:100%;
+      top:0;
+      z-index:1000
     }
-    nav{display:flex;justify-content:space-between;align-items:center}
-    .logo{display:flex;align-items:center;gap:10px;color:#fff;font-size:1.8rem;font-weight:bold}
-    .logo-icon{width:45px;height:45px;
-      /* background:#fff; */
-      border-radius:12px;display:flex;align-items:center;justify-content:center;color:#0052FF;font-weight:bold;font-size:1.2rem}
-    .nav-links{display:flex;gap:30px;list-style:none}
-    .nav-links a{color:#fff;text-decoration:none;font-weight:500;transition:opacity .3s;padding:8px 16px;border-radius:8px}
+    nav{
+      display:flex;
+      justify-content:space-between;
+      align-items:center
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:0.6rem;
+      color:#fff;
+      font-size:1.5rem;
+      font-weight:bold
+    }
+    .logo-icon{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#0052FF;
+      font-weight:bold;
+      font-size:1.1rem
+    }
+    .nav-links{
+      display:flex;
+      gap:30px;
+      list-style:none
+    }
+    .nav-links a{
+      color:#fff;
+      text-decoration:none;
+      font-weight:500;
+      transition:opacity .3s;
+      padding:8px 16px;
+      border-radius:8px
+    }
     .nav-links a:hover{background:rgba(255,255,255,.2)}
-    .nav-cta{background:#fff;color:#0052FF;padding:10px 20px;border-radius:25px;text-decoration:none;font-weight:600;transition:transform .3s,box-shadow .3s}
-    .nav-cta:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(255,255,255,.3)}
+    .nav-cta{
+      background:#fff;
+      color:#0052FF;
+      padding:0.6rem 1.2rem;
+      border-radius:25px;
+      text-decoration:none;
+      font-weight:600;
+      transition:transform .3s,box-shadow .3s;
+      font-size:0.9rem
+    }
+    .nav-cta:hover{
+      transform:translateY(-2px);
+      box-shadow:0 5px 15px rgba(255,255,255,.3)
+    }
 
     /* Hero */
-    .hero{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px}
-    .hero-content{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
-    .hero-text{color:#fff;text-align:center;}
-    .hero-text h1{font-size:3.5rem;font-weight:700;margin-bottom:1.5rem;line-height:1.2;text-shadow:0 2px 10px rgba(0,0,0,.2)}
-    .hero-text p{font-size:1.3rem;margin-bottom:2rem;opacity:.95;line-height:1.6}
-    /* .hero-buttons{display:flex;flex-direction:column;gap:15px;max-width:300px} */
-    .hero-buttons{
+    .hero{
+      min-height:100vh;
+      display:flex;
       align-items:center;
-      margin: 0 auto;
-      max-width: 100%;
-      width: 100%;
+      padding:120px 0 80px
     }
-    /* .download-buttons{display:flex;gap:15px;flex-wrap:wrap} */
+    .hero-content{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:4rem;
+      align-items:center
+    }
+    .hero-text{
+      color:#fff;
+      text-align:center
+    }
+    .hero-text h1{
+      font-size:3rem;
+      font-weight:700;
+      margin-bottom:1.5rem;
+      line-height:1.2;
+      text-shadow:0 2px 10px rgba(0,0,0,.2)
+    }
+    .hero-text p{
+      font-size:1.2rem;
+      margin-bottom:2rem;
+      opacity:.95;
+      line-height:1.6
+    }
+    .hero-buttons{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:1rem;
+      width:100%
+    }
     .download-buttons{
-      justify-content: center !important; /* force le centrage */
-      width: 100%;
+      display:flex;
+      gap:1rem;
+      justify-content:center;
+      width:100%;
+      flex-wrap:wrap
     }
-    .store-btn{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;background:#fff;color:#333;text-decoration:none;border-radius:12px;font-weight:600;font-size:.95rem;transition:transform .3s,box-shadow .3s;box-shadow:0 3px 15px rgba(0,0,0,.1);min-width:140px;justify-content:center}
-    .store-btn:hover{transform:translateY(-2px);box-shadow:0 5px 25px rgba(0,0,0,.2)}
+    .store-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 20px;
+      background:#fff;
+      color:#333;
+      text-decoration:none;
+      border-radius:12px;
+      font-weight:600;
+      font-size:0.9rem;
+      transition:transform .3s,box-shadow .3s;
+      box-shadow:0 3px 15px rgba(0,0,0,.1);
+      min-width:140px;
+      justify-content:center
+    }
+    .store-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 5px 25px rgba(0,0,0,.2)
+    }
     .store-btn img{width:20px;height:20px}
-    .btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:15px 30px;background:rgba(255,255,255,.2);color:#fff;text-decoration:none;border-radius:15px;font-weight:600;font-size:1.1rem;transition:all .3s;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.3)}
-    .btn-secondary:hover{background:rgba(255,255,255,.3);transform:translateY(-2px)}
 
     /* Phone mockup */
-    .hero-phone{display:flex;justify-content:center;position:relative}
-    .phone-container{position:relative;perspective:1000px}
+    .hero-phone{
+      display:flex;
+      justify-content:center;
+      position:relative
+    }
+    .phone-container{
+      position:relative;
+      perspective:1000px
+    }
     .phone-mockup{
-      width:300px;height:650px;background:#1a1a1a;border-radius:35px;padding:8px;
-      box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative;transform:rotateY(-10deg) rotateX(5deg);transition:transform .3s ease
+      width:280px;
+      height:600px;
+      background:#1a1a1a;
+      border-radius:35px;
+      padding:8px;
+      box-shadow:0 20px 60px rgba(0,0,0,.4);
+      position:relative;
+      transform:rotateY(-10deg) rotateX(5deg);
+      transition:transform .3s ease
     }
     .phone-mockup:hover{transform:rotateY(-5deg) rotateX(2deg)}
     .phone-screen{
-      width:100%;height:100%;background:#f8f9ff;border-radius:27px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center
+      width:100%;
+      height:100%;
+      background:#f8f9ff;
+      border-radius:27px;
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center
     }
-    /* >>> Votre photo dans l'écran du téléphone */
     .phone-screen img{
-      width:100%;height:100%;object-fit:cover;border-radius:27px;display:block
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      border-radius:27px;
+      display:block
     }
 
     /* Decorative */
-    .floating-element{position:absolute;opacity:.1;animation:float 6s ease-in-out infinite}
+    .floating-element{
+      position:absolute;
+      opacity:.1;
+      animation:float 6s ease-in-out infinite;
+      font-size:2rem
+    }
     .floating-element:nth-child(1){top:10%;left:10%;animation-delay:0s}
     .floating-element:nth-child(2){top:20%;right:15%;animation-delay:2s}
     .floating-element:nth-child(3){bottom:30%;left:5%;animation-delay:4s}
     @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
-    .qr-decoration{position:absolute;width:60px;height:60px;background:#fff;opacity:.1;top:15%;right:10%;border-radius:8px}
-    .nfc-decoration{position:absolute;width:40px;height:40px;background:#fff;opacity:.1;bottom:20%;left:15%;border-radius:50%}
+    .qr-decoration{
+      position:absolute;
+      width:60px;
+      height:60px;
+      background:#fff;
+      opacity:.1;
+      top:15%;
+      right:10%;
+      border-radius:8px
+    }
+    .nfc-decoration{
+      position:absolute;
+      width:40px;
+      height:40px;
+      background:#fff;
+      opacity:.1;
+      bottom:20%;
+      left:15%;
+      border-radius:50%
+    }
 
     /* Support section */
-    .support-section{background:#fff;padding:80px 0}
-    /* .support-content{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start} */
+    .support-section{
+      background:#fff;
+      padding:5rem 0
+    }
     .support-content{
-      grid-template-columns: 1fr !important;
+      text-align:center
     }
-    .support-card{
-      background:#f8f9ff;padding:1.5rem;border-radius:20px;border:2px solid transparent;transition:all .3s
-    }
-    .support-card:hover{border-color:#0052FF;transform:translateY(-5px)}
-    .support-card h3{color:#0052FF;margin-bottom:1rem; font-size:x-large;}
-    .contact-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:1rem}
-    .chip{
-      display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#fff;border:1px solid #e5e7eb;text-decoration:none;color:#111;font-weight:600
-    }
-    .chip:hover{border-color:#0052FF}
-    form.support-form{display:grid;gap:14px;margin-top:.5rem}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .support-input,.support-textarea,select{
-      width:100%;padding:12px 14px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;font:inherit
-    }
-    .support-textarea{min-height:120px;resize:vertical}
-    .support-submit{
-      background:#0052FF;color:#fff;border:none;border-radius:12px;padding:14px 18px;font-weight:700;cursor:pointer
-    }
-    .support-submit:hover{background:#0040E0}
-    .hint{font-size:.9rem;color:#666}
 
     /* Features */
-    .features-preview{background:#f8f9ff;padding:50px 0; }
-    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;margin-top:3rem}
-    .feature-card{text-align:center;padding:2rem;background:#ffffff;border-radius:20px;border:2px solid transparent;transition:all .3s}
-    .feature-card:hover{border-color:#0052FF;transform:translateY(-5px)}
-    .feature-icon{font-size:3rem;margin-bottom:1rem}
-    .feature-card h3{color:#0052FF;margin-bottom:1rem; font-size:x-large;}
-    .section-title{text-align:center;font-size:2.5rem;font-weight:700;margin-bottom:1rem;color:#0052FF;}
-    .section-subtitle{text-align:center;font-size:1.2rem;color:#666;
-      /* max-width:600px; */
-      margin:0 auto; margin-bottom: 2rem;}
-    .section-subtitle2{text-align:left;font-size:1.1rem;color:#666;
-      /* max-width:600px; */
-      margin:0 auto; margin-top: 1rem;}
-
-
-    /* Responsive */
-    @media (max-width:968px){
-      .hero-content{grid-template-columns:1fr;gap:40px;text-align:center; min-height: calc(100vh - 120px); align-content: center;}
-      .hero-text h1{font-size:2.8rem}
-      .phone-mockup{transform:none;width:250px;height:500px}
-      .download-buttons{justify-content:center}
-      /* .support-content{grid-template-columns:1fr} */
-      .support-content{
-        grid-template-columns: 1fr !important;
-      }
+    .features-preview{
+      background:#f8f9ff;
+      padding:5rem 0
     }
-    @media (max-width:768px){
-      .nav-links{display:none}
-      .hero-text h1{font-size:2.2rem}
-      .hero-text p{font-size:1.1rem}
-      /* .hero-buttons{max-width:100%;  align-items: center; margin: 0 auto;} */
-      .hero-buttons{
-        align-items:center;
-        margin: 0 auto;
-        max-width: 100%;
-        width: 100%;
-      }
-      .phone-mockup{width:220px;height:440px}
-      /* .download-buttons{flex-direction:column;align-items:center; justify-content: center; width: 100%;} */
-      .download-buttons{
-        justify-content: center !important; /* force le centrage */
-        width: 100%;
-      }
-      .store-btn{width:100%;max-width:200px}
+    .features-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+      gap:2rem;
+      margin-top:3rem
     }
-
-    /* Contact */
-    .contact-list{
-      display: grid;
-      gap: 10px;
-      margin-top: 1rem;
+    .feature-card{
+      text-align:center;
+      padding:2rem;
+      background:#ffffff;
+      border-radius:20px;
+      border:2px solid transparent;
+      transition:all .3s
     }
-    .contact-item{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      padding: 12px 14px;
-      border-radius: 12px;
+    .feature-card:hover{
+      border-color:#0052FF;
+      transform:translateY(-5px)
     }
-    .contact-item .label{
-      width: 95px;
-      font-weight: 700;
-      color: #111;
+    .feature-card h3{
+      color:#0052FF;
+      margin-bottom:1rem;
+      font-size:1.3rem
     }
-    .contact-item a{
-      color: #0052FF;
-      text-decoration: none;
-      word-break: break-word;
+    .section-title{
+      text-align:center;
+      font-size:2.5rem;
+      font-weight:700;
+      margin-bottom:1rem;
+      color:#0052FF
+    }
+    .section-subtitle{
+      text-align:center;
+      font-size:1.2rem;
+      color:#666;
+      margin:0 auto;
+      margin-bottom:2rem
     }
     .info-blue{
       color:#0052FF;
-      font-weight:700;
+      font-weight:700
     }
 
+    /* Responsive Design */
+    
+    /* Tablettes */
+    @media (max-width: 1024px) {
+      .container {
+        padding: 0 1.5rem;
+      }
+      
+      .hero-text h1 {
+        font-size: 2.8rem;
+      }
+      
+      .phone-mockup {
+        width: 260px;
+        height: 550px;
+      }
+      
+      .section-title {
+        font-size: 2.2rem;
+      }
+    }
+
+    /* Écrans moyens */
+    @media (max-width: 968px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        text-align: center;
+        min-height: calc(100vh - 120px);
+        align-content: center;
+      }
+      
+      .hero-text h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero-text p {
+        font-size: 1.1rem;
+      }
+      
+      .phone-mockup {
+        transform: none;
+        width: 240px;
+        height: 480px;
+      }
+      
+      .download-buttons {
+        justify-content: center;
+      }
+      
+      .features-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 1rem;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+      
+      .logo {
+        font-size: 1.3rem;
+      }
+      
+      .logo-icon {
+        width: 35px;
+        height: 35px;
+      }
+      
+      .nav-cta {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+      
+      .hero {
+        padding: 100px 0 60px;
+      }
+      
+      .hero-content {
+        gap: 2rem;
+      }
+      
+      .hero-text h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+      
+      .hero-text p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .download-buttons {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 0.8rem;
+      }
+      
+      .store-btn {
+        width: 100%;
+        max-width: 250px;
+        padding: 14px 20px;
+        font-size: 0.95rem;
+      }
+      
+      .phone-mockup {
+        width: 200px;
+        height: 400px;
+      }
+      
+      .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 0.8rem;
+      }
+      
+      .section-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .support-section,
+      .features-preview {
+        padding: 3rem 0;
+      }
+      
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+      
+      .feature-card {
+        padding: 1.5rem;
+      }
+      
+      .feature-card h3 {
+        font-size: 1.2rem;
+      }
+      
+      .floating-element {
+        font-size: 1.5rem;
+      }
+      
+      .qr-decoration {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .nfc-decoration {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    /* Très petits écrans */
+    @media (max-width: 480px) {
+      .container {
+        padding: 0 0.8rem;
+      }
+      
+      .hero-text h1 {
+        font-size: 1.8rem;
+      }
+      
+      .hero-text p {
+        font-size: 0.95rem;
+      }
+      
+      .phone-mockup {
+        width: 180px;
+        height: 360px;
+      }
+      
+      .section-title {
+        font-size: 1.6rem;
+      }
+      
+      .section-subtitle {
+        font-size: 0.95rem;
+      }
+      
+      .feature-card {
+        padding: 1.2rem;
+      }
+      
+      .store-btn {
+        max-width: 200px;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+      }
+      
+      .floating-element {
+        display: none; /* Masquer sur très petits écrans pour éviter l'encombrement */
+      }
+    }
+
+    /* Écrans très larges */
+    @media (min-width: 1400px) {
+      .hero-text h1 {
+        font-size: 3.5rem;
+      }
+      
+      .phone-mockup {
+        width: 320px;
+        height: 650px;
+      }
+      
+      .section-title {
+        font-size: 3rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -201,15 +508,9 @@
     <nav class="container">
       <div class="logo">
         <div class="logo-icon">
-          <img class="logo-icon" src="./images/Logo.png" alt="Aperçu Olla avec votre photo" />
-
+          <img class="logo-icon" src="./images/Logo.png" alt="Logo Olla" />
         </div> Olla
       </div>
-      <!-- <ul class="nav-links">
-        <li><a href="#features">Fonctionnalités</a></li>
-        <li><a href="#about">À propos</a></li>
-        <li><a href="#support">Support</a></li>
-      </ul> -->
       <a href="#download" class="nav-cta">Télécharger</a>
     </nav>
   </header>
@@ -233,7 +534,6 @@
                 Play Store
               </a>
             </div>
-            <!-- <a href="#support" class="btn-secondary"><span>💬</span> Support & Contact</a> -->
           </div>
         </div>
 
@@ -241,7 +541,6 @@
           <div class="phone-container">
             <div class="phone-mockup">
               <div class="phone-screen">
-                <!-- >>> Remplacez le src par le chemin de VOTRE photo -->
                 <img src="./images/ScreenApp1.jpeg" alt="Aperçu Olla avec votre photo" />
               </div>
             </div>
@@ -260,9 +559,6 @@
         ou téléphone au
               <a class="info-blue">+33&nbsp;6&nbsp;52&nbsp;21&nbsp;13&nbsp;52</a>.<br>
       </p>
-
-  
-
     </div>
   </section>
 
@@ -273,36 +569,28 @@
       <p class="section-subtitle">Une solution simple, rapide et sécurisée pour gérer toutes vos cartes de fidélité</p>
       <div class="features-grid">
         <div class="feature-card">
-          <!-- <div class="feature-icon">🚀</div> -->
-          <!-- <img class="feature-icon" src="C:\Users\btruquin\Desktop\Olla\timer-line.png" alt="logo rapide" /> -->
-          <h3>Ultra rapide</h3><p>Un simple tap NFC ou scan QR pour gagner vos points instantanément</p>
+          <h3>Ultra rapide</h3>
+          <p>Approchez votre téléphone ou scannez le QR Code pour gagner vos points</p>
         </div>
         <div class="feature-card">
-          <!-- <div class="feature-icon">🔒</div> -->
-          <!-- <img class="feature-icon" src="C:\Users\btruquin\Desktop\Olla\lock-2-line.png" alt="logo rapide" /> -->
-          <h3>100% sécurisé</h3><p>QR codes éphémères et chiffrement pour protéger vos données</p>
+          <h3>100% sécurisé</h3>
+          <p>QR codes éphémères et chiffrement pour protéger vos données</p>
         </div>
         <div class="feature-card">
-          <!-- <div class="feature-icon">🎯</div> -->
-          <!-- <img class="feature-icon" src="C:\Users\btruquin\Desktop\Olla\asmartphone-line.png" alt="logo rapide" /> -->
-          <h3>Tout en un</h3><p>Plus jamais de cartes oubliées, tout est dans votre smartphone</p>
+          <h3>Tout en un</h3>
+          <p>Plus jamais de cartes oubliées, tout est dans votre smartphone</p>
         </div>
         <div class="feature-card">
-          <!-- <div class="feature-icon">🆓</div> -->
-          <!-- <img class="feature-icon" src="C:\Users\btruquin\Desktop\Olla\money-euro-box-line.png" alt="logo rapide" /> -->
-          <h3>Gratuit</h3><p>Application 100% gratuite, sans publicité ni abonnement</p>
+          <h3>Gratuit</h3>
+          <p>Application 100% gratuite, sans publicité ni abonnement</p>
         </div>
       </div>
     </div>
   </section>
 
     <!-- FOOTER -->
-    <footer style="background:#ffffff; padding:40px 20px; text-align:center; 
-    /* margin-top:60px; */
-    ">
-      <!-- <p style="font-weight:600; color:#0052FF; font-size:2rem;">Olla</p> -->
-      <!-- <p style="margin:8px 0; color:#ffffff;">Toutes vos cartes de fidélité en une seule app</p> -->
-      <p style="font-size:0.9rem; color:#888; margin-top:20px;">© 2025 Olla. Tous droits réservés.</p>
+    <footer style="background:#ffffff; padding:2rem 1rem; text-align:center;">
+      <p style="font-size:0.9rem; color:#888;">© 2025 Olla. Tous droits réservés.</p>
     </footer>
 </body>
 </html>
