@@ -1,4 +1,3 @@
-// app/onboarding/plan/page.tsx
 import PlanSelection from '@/components/onboarding/PlanSelection';
 
 export const metadata = {

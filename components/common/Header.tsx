@@ -9,36 +9,36 @@ export default function Header() {
 
   return (
     <header className="border-b border-border bg-white sticky top-0 z-50">
-      <nav className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold text-primary">
           Olla
         </Link>
 
-        {/* Desktop Menu */}
-        <ul className="hidden md:flex items-center gap-8 text-text-light font-medium">
+        {/* Desktop Menu - Centered */}
+        <ul className="hidden md:flex items-center gap-8 text-text-light font-medium absolute left-1/2 transform -translate-x-1/2">
           <li>
             <Link href="/" className="hover:text-primary transition">
               Accueil
             </Link>
           </li>
           <li>
-            <Link href="/features" className="hover:text-primary transition">
+            <Link href="/marketing/features" className="hover:text-primary transition">
               Fonctionnalités
             </Link>
           </li>
           <li>
-            <Link href="/pricing" className="hover:text-primary transition">
+            <Link href="/marketing/pricing" className="hover:text-primary transition">
               Tarifs
             </Link>
           </li>
           <li>
-            <Link href="/faq" className="hover:text-primary transition">
+            <Link href="/marketing/faq" className="hover:text-primary transition">
               FAQ
             </Link>
           </li>
           <li>
-            <Link href="/contact" className="hover:text-primary transition">
+            <Link href="/marketing/contact" className="hover:text-primary transition">
               Contact
             </Link>
           </li>
@@ -47,7 +47,7 @@ export default function Header() {
         {/* CTA Buttons */}
         <div className="hidden md:flex gap-4">
           <Link
-            href="/login"
+            href="/auth/login"
             className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition"
           >
             Espaces pro
@@ -81,23 +81,23 @@ export default function Header() {
             Accueil
           </Link>
           <Link
-            href="/features"
+            href="/marketing/features"
             className="block text-text hover:text-primary"
           >
             Fonctionnalités
           </Link>
-          <Link href="/pricing" className="block text-text hover:text-primary">
+          <Link href="/marketing/pricing" className="block text-text hover:text-primary">
             Tarifs
           </Link>
-          <Link href="/faq" className="block text-text hover:text-primary">
+          <Link href="/marketing/faq" className="block text-text hover:text-primary">
             FAQ
           </Link>
-          <Link href="/contact" className="block text-text hover:text-primary">
+          <Link href="/marketing/contact" className="block text-text hover:text-primary">
             Contact
           </Link>
           <div className="flex flex-col gap-3">
             <Link
-              href="/login"
+              href="/auth/login"
               className="block px-6 py-2 bg-primary text-white rounded-lg text-center hover:bg-secondary transition"
             >
               Espaces pro

@@ -1,18 +1,7 @@
-// contexts/OnboardingContext.tsx
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
-
-export interface Plan {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  price_monthly: number;
-  features: string[];
-  max_loyalty_programs: number | null;
-  display_order: number;
-}
+import type { Plan } from '@/types';
 
 interface OnboardingContextType {
   selectedPlan: Plan | null;

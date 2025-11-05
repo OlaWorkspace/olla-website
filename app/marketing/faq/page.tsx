@@ -1,4 +1,4 @@
-import Section from "@/components/section";
+import Section from "@/components/marketing/Section";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -87,7 +87,7 @@ export default function FAQPage() {
             Notre équipe est là pour vous aider. N'hésitez pas à nous contacter.
           </p>
           <a
-            href="/contact"
+            href="/marketing/contact"
             className="inline-block px-8 py-3 bg-primary text-white rounded-lg hover:bg-secondary transition font-semibold"
           >
             Nous contacter

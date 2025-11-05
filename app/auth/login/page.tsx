@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import Header from "@/components/common/Header";
+import Footer from "@/components/common/Footer";
 
 export default function LoginPage() {
   const router = useRouter();

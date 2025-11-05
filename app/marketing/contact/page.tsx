@@ -1,6 +1,6 @@
 "use client";
 
-import Section from "@/components/section";
+import Section from "@/components/marketing/Section";
 import { type Metadata } from "next";
 import { useState } from "react";
 import { Mail, MapPin, MessageSquare } from "lucide-react";

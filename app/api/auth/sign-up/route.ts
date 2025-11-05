@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
       let userProfile;
 
-      if (!existingUser && !checkError) {
+      if (!existingUser) {
         // L'utilisateur n'existe pas, le créer
         const { error: profileError } = await supabase
           .from('users')

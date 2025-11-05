@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
-import { useAuth } from '@/hooks/useAuth';
-import { useSupabaseEdgeFunction } from '@/hooks/useSupabaseEdgeFunction';
+import { useAuth } from '@/lib/supabase/hooks/useAuth';
+import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 
 const CATEGORIES = [
   'Commerce',
@@ -34,7 +34,8 @@ interface Toast {
 export default function BusinessCreation() {
   const router = useRouter();
   const { user, userProfile } = useAuth();
-  const { callFunction } = useSupabaseEdgeFunction();
+  const { selectedPlan } = useOnboarding();
+  const { callFunction } = useEdgeFunction();
 
   const [formData, setFormData] = useState<FormData>({
     businessName: '',
@@ -96,13 +97,20 @@ export default function BusinessCreation() {
         return;
       }
 
-      // Tentative d'appel à l'Edge Function avec le plan "free" par défaut
+      // Vérifier qu'un plan a été sélectionné
+      if (!selectedPlan) {
+        showToast('error', 'Veuillez sélectionner un plan avant de créer votre commerce');
+        setLoading(false);
+        return;
+      }
+
+      // Tentative d'appel à l'Edge Function avec le plan sélectionné
       const { data, error } = await callFunction(
         'web-complete-professional-onboarding',
         {
           userId: userProfile.id,
           authId: user.id,
-          planSlug: 'free',  // Plan par défaut pour les nouveaux utilisateurs
+          planSlug: selectedPlan.slug,
           businessData: {
             businessName: formData.businessName,
             address: formData.address,
@@ -297,11 +305,13 @@ export default function BusinessCreation() {
       </div>
 
       {/* Info */}
-      <div className="mt-8 p-6 bg-info/10 border border-info rounded-lg text-center">
-        <p className="text-info text-sm">
-          <strong>Plan:</strong> Gratuit (Accès complet au platform)
-        </p>
-      </div>
+      {selectedPlan && (
+        <div className="mt-8 p-6 bg-info/10 border border-info rounded-lg text-center">
+          <p className="text-info text-sm">
+            <strong>Plan sélectionné:</strong> {selectedPlan.name} - {selectedPlan.price_monthly === 0 ? 'Gratuit' : `${selectedPlan.price_monthly}€/mois`}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

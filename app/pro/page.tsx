@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/clients/server";
 
 export default async function DashboardPage() {
   const supabase = await createClient();

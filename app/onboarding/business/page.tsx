@@ -1,4 +1,3 @@
-// app/onboarding/business/page.tsx
 import BusinessCreation from '@/components/onboarding/BusinessCreation';
 
 export const metadata = {

@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BarChart3, Users, Gift, Settings, TrendingUp } from 'lucide-react';
-import { createClient } from '@/lib/supabase-client';
+import { createClient } from '@/lib/supabase/clients/browser';
 
 interface Business {
   id: string;

@@ -4,9 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
-import { createClient } from "@/lib/supabase-client";
+import Header from "@/components/common/Header";
+import Footer from "@/components/common/Footer";
+import { createClient } from "@/lib/supabase/clients/browser";
 
 interface FormData {
   firstName: string;
@@ -88,9 +88,6 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      console.log("🚀 Début inscription pour:", formData.email);
-
-      // Appel à l'API route (qui gère tout: auth + profil avec pro = true)
       const response = await fetch("/api/auth/sign-up", {
         method: "POST",
         headers: {
@@ -107,10 +104,7 @@ export default function SignupPage() {
 
       const data = await response.json();
 
-      console.log('Sign-up response:', { status: response.status, data });
-
       if (!response.ok) {
-        console.error('Sign-up error:', data);
         const errorMessage = data.error || "Erreur lors de l'inscription";
         if (errorMessage.includes('already registered') || errorMessage.includes('User already')) {
           setErrors(prev => ({ ...prev, email: 'Cet email est déjà enregistré' }));
@@ -121,39 +115,16 @@ export default function SignupPage() {
         return;
       }
 
-      console.log("✅ Inscrit:", data.user?.email);
-
       // Connexion immédiate avec les identifiants
-      console.log("🔐 Connexion immédiate...");
-      const { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
+      await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password
       });
 
-      if (signInError) {
-        console.error("❌ Erreur connexion:", signInError.message);
-        // Même en cas d'erreur, rediriger (le middleware gèrera)
-      } else {
-        console.log("✅ Connecté avec succès", {
-          userId: signInData?.user?.id,
-          hasSession: !!signInData?.session
-        });
-      }
-
-      // Vérifier que la session est bien définie
-      console.log("🔍 Vérification de la session...");
-      const { data: sessionCheck } = await supabase.auth.getSession();
-      console.log("Session check:", {
-        hasSession: !!sessionCheck?.session,
-        user: sessionCheck?.session?.user?.email
-      });
-
-      console.log("📍 Redirection vers /onboarding/business");
-      // Redirection vers onboarding/business
-      router.push("/onboarding/business");
+      // Redirection vers onboarding/plan pour sélectionner le plan
+      router.push("/onboarding/plan");
 
     } catch (error: any) {
-      console.error("💥 Erreur générale:", error);
       setErrors(prev => ({ ...prev, email: error.message || "Une erreur est survenue" }));
     } finally {
       setLoading(false);
@@ -314,7 +285,7 @@ export default function SignupPage() {
 
             <p className="text-center text-text-light text-sm mt-6">
               Vous avez déjà un compte ?{" "}
-              <Link href="/login" className="text-primary hover:text-secondary transition font-semibold">
+              <Link href="/auth/login" className="text-primary hover:text-secondary transition font-semibold">
                 Se connecter
               </Link>
             </p>

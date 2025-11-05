@@ -19,12 +19,12 @@ export default function Footer() {
             <h4 className="font-semibold text-text mb-4">Produit</h4>
             <ul className="space-y-2 text-sm text-text-light">
               <li>
-                <Link href="/features" className="hover:text-primary">
+                <Link href="/marketing/features" className="hover:text-primary">
                   Fonctionnalités
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="hover:text-primary">
+                <Link href="/marketing/pricing" className="hover:text-primary">
                   Tarifs
                 </Link>
               </li>
@@ -41,7 +41,7 @@ export default function Footer() {
             <h4 className="font-semibold text-text mb-4">Entreprise</h4>
             <ul className="space-y-2 text-sm text-text-light">
               <li>
-                <Link href="/contact" className="hover:text-primary">
+                <Link href="/marketing/contact" className="hover:text-primary">
                   Contact
                 </Link>
               </li>

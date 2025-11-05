@@ -1,9 +1,8 @@
-// hooks/useSupabaseEdgeFunction.ts
 'use client';
 
-import { createClient } from '@/lib/supabase-client';
+import { createClient } from '@/lib/supabase/clients/browser';
 
-export function useSupabaseEdgeFunction() {
+export function useEdgeFunction() {
   const supabase = createClient();
 
   const callFunction = async <T = any>(
@@ -11,15 +10,12 @@ export function useSupabaseEdgeFunction() {
     payload: Record<string, any>
   ): Promise<{ data: T | null; error: string | null }> => {
     try {
-      // Get the auth token
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
 
-      // Build the function URL
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const functionUrl = `${supabaseUrl}/functions/v1/${functionName}`;
 
-      // Make the request with fetch (more reliable than supabase.functions.invoke)
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
@@ -29,7 +25,6 @@ export function useSupabaseEdgeFunction() {
         body: JSON.stringify(payload),
       });
 
-      // Parse response
       const responseData = await response.json();
 
       if (!response.ok) {

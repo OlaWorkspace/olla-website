@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, ShoppingCart, CreditCard, Users, HelpCircle, LifeBuoy } from "lucide-react";
-import LogOutButton from "@/components/LogOutButton";
+import LogOutButton from "@/components/common/LogOutButton";
 
 const menuItems = [
   {

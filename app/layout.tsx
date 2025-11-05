@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import ConditionalLayout from "@/components/common/ConditionalLayout";
 
 export const metadata: Metadata = {
   title: "Olla — La fidélité sans carte",
@@ -26,7 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className="bg-white text-text antialiased">{children}</body>
+      <body className="bg-white text-text antialiased">
+        <ConditionalLayout>{children}</ConditionalLayout>
+      </body>
     </html>
   );
 }

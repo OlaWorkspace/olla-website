@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/clients/server";
 import Sidebar from "@/components/pro/Sidebar";
 
 export default async function ProLayout({

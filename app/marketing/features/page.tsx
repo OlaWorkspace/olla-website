@@ -1,5 +1,5 @@
-import Section from "@/components/section";
-import FeatureCard from "@/components/feature-card";
+import Section from "@/components/marketing/Section";
+import FeatureCard from "@/components/marketing/FeatureCard";
 import { type Metadata } from "next";
 import { Zap, CheckCircle, Award, BarChart3, Share2, Lock } from "lucide-react";
 

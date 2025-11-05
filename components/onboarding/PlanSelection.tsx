@@ -4,13 +4,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Zap } from 'lucide-react';
-import { useOnboarding, Plan } from '@/contexts/OnboardingContext';
-import { useSupabaseEdgeFunction } from '@/hooks/useSupabaseEdgeFunction';
+import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
+import type { Plan } from '@/types';
 
 export default function PlanSelection() {
   const router = useRouter();
   const { setSelectedPlan } = useOnboarding();
-  const { callFunction } = useSupabaseEdgeFunction();
+  const { callFunction } = useEdgeFunction();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

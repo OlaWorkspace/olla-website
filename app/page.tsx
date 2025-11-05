@@ -1,6 +1,6 @@
-import Hero from "@/components/hero";
-import Section from "@/components/section";
-import FeatureCard from "@/components/feature-card";
+import Hero from "@/components/marketing/Hero";
+import Section from "@/components/marketing/Section";
+import FeatureCard from "@/components/marketing/FeatureCard";
 import { Zap, CheckCircle, Award } from "lucide-react";
 
 export default function Home() {
@@ -48,7 +48,7 @@ export default function Home() {
             clients en fidèles.
           </p>
           <a
-            href="/login"
+            href="/auth/login"
             className="inline-block px-8 py-4 bg-success text-white rounded-lg hover:bg-opacity-90 transition font-semibold"
           >
             Essayer maintenant

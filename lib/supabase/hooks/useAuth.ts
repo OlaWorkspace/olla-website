@@ -1,18 +1,9 @@
-// hooks/useAuth.ts
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase-client';
+import { createClient } from '@/lib/supabase/clients/browser';
 import { User } from '@supabase/supabase-js';
-
-interface UserProfile {
-  id: string;
-  user_firstname: string;
-  user_lastname: string;
-  user_email: string;
-  pro: boolean;
-  auth_id: string | null;
-}
+import type { User as UserProfile } from '@/types';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
