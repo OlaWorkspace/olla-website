@@ -63,11 +63,11 @@ export default function WelcomeDashboard() {
           .eq('user_id', userProfile?.id)
           .single();
 
-        // Récupération de l'abonnement actif
+        // Récupération de l'abonnement actif de l'utilisateur (user_subscriptions)
         let subscription = null;
-        if (professional?.business_id) {
+        if (userProfile?.id) {
           const { data: sub } = await supabase
-            .from('business_subscriptions')
+            .from('user_subscriptions')
             .select(`
               *,
               subscription_plans (
@@ -75,7 +75,7 @@ export default function WelcomeDashboard() {
                 slug
               )
             `)
-            .eq('business_id', professional.business_id)
+            .eq('user_id', userProfile.id)
             .eq('status', 'active')
             .single();
           subscription = sub;

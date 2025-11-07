@@ -18,10 +18,10 @@ export default function Hero() {
       {/* CTA Buttons */}
       <div className="flex flex-col md:flex-row gap-4 justify-center mb-20">
         <Link
-          href="/auth/login"
+          href="/become-pro"
           className="px-8 py-4 bg-success text-white rounded-lg hover:bg-opacity-90 transition inline-flex items-center justify-center gap-2 font-semibold"
         >
-          Essayer maintenant
+          Devenir professionnel
           <ArrowRight className="w-5 h-5" />
         </Link>
         <Link

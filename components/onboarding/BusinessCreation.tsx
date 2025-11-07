@@ -3,18 +3,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, AlertCircle, Lightbulb } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/lib/supabase/hooks/useAuth';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
+import AddressAutocomplete from './AddressAutocomplete';
 
 const CATEGORIES = [
-  'Commerce',
-  'Restaurant',
-  'Coiffure',
-  'Beauté',
-  'Sport',
-  'Services'
+  '🍽️ Restaurant',
+  '💇 Coiffeur',
+  '☕ Café',
+  '🛍️ Boutique',
+  '💪 Sport',
+  '🏥 Services',
+  '✨ Beauté',
+  '📚 Autre'
 ];
 
 interface FormData {
@@ -151,34 +154,58 @@ export default function BusinessCreation() {
     }
   };
 
+  // Calculate progress
+  const filledFields = [
+    formData.businessName,
+    formData.address,
+    formData.phone,
+    formData.category
+  ].filter(Boolean).length;
+  const progressPercent = (filledFields / 4) * 100;
+
   return (
     <div className="max-w-2xl mx-auto">
       {/* Back Button */}
       <button
         onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-primary hover:text-secondary mb-8 transition"
+        className="inline-flex items-center gap-2 text-primary hover:text-secondary mb-8 transition text-sm font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
         Retour
       </button>
 
+      {/* Progress Bar */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-xs font-semibold text-text">Étape 3/3</h2>
+          <span className="text-xs text-text-light">{filledFields}/4</span>
+        </div>
+        <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
+          <div
+            className="h-full bg-success transition-all duration-300"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text mb-2">
-          Créez votre business
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-text mb-2 leading-tight">
+          Configurez votre commerce
         </h1>
-        <p className="text-text-light">
-          Renseignez les informations de votre commerce pour accéder à votre espace professionnel.
+        <p className="text-text-light text-sm">
+          Quelques infos pour la confiance client.
         </p>
       </div>
 
       {/* Form Card */}
-      <div className="bg-white border border-border rounded-2xl p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-white border border-border rounded-2xl p-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Business Name */}
           <div>
-            <label className="block text-text font-semibold mb-2">
+            <label className="block text-text font-semibold text-sm mb-1.5 flex items-center gap-2">
               Nom du commerce <span className="text-error">*</span>
+              {formData.businessName && <CheckCircle2 className="w-4 h-4 text-success" />}
             </label>
             <input
               type="text"
@@ -186,31 +213,45 @@ export default function BusinessCreation() {
               value={formData.businessName}
               onChange={handleInputChange}
               disabled={loading}
-              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50"
+              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50 transition"
               placeholder="Ex: La Boutique du Centre"
+              autoComplete="organization"
             />
+            {!formData.businessName && (
+              <p className="text-xs text-text-light mt-1 flex items-start gap-1.5">
+                <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                Vrai nom = confiance client
+              </p>
+            )}
           </div>
 
-          {/* Address */}
+          {/* Address with Autocomplete */}
           <div>
-            <label className="block text-text font-semibold mb-2">
+            <label className="block text-text font-semibold text-sm mb-1.5 flex items-center gap-2">
               Adresse <span className="text-error">*</span>
+              {formData.address && <CheckCircle2 className="w-4 h-4 text-success" />}
             </label>
-            <input
-              type="text"
-              name="address"
+            <AddressAutocomplete
               value={formData.address}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50"
+              onSelectAddress={(address) => {
+                setFormData(prev => ({ ...prev, address }));
+              }}
               placeholder="Ex: 123 Rue de la Paix, 75000 Paris"
+              disabled={loading}
             />
+            {!formData.address && (
+              <p className="text-xs text-text-light mt-1 flex items-start gap-1.5">
+                <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                Visible sur votre fiche Olla
+              </p>
+            )}
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-text font-semibold mb-2">
+            <label className="block text-text font-semibold text-sm mb-1.5 flex items-center gap-2">
               Téléphone <span className="text-error">*</span>
+              {formData.phone && <CheckCircle2 className="w-4 h-4 text-success" />}
             </label>
             <input
               type="tel"
@@ -218,41 +259,24 @@ export default function BusinessCreation() {
               value={formData.phone}
               onChange={handleInputChange}
               disabled={loading}
-              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50"
-              placeholder="Ex: 01 23 45 67 89 ou +33 1 2345 67 89"
-            />
-            <p className="text-xs text-text-light mt-1">
-              Format français ou international
-            </p>
-          </div>
-
-          {/* Website */}
-          <div>
-            <label className="block text-text font-semibold mb-2">
-              Site web <span className="text-text-light text-sm">(optionnel)</span>
-            </label>
-            <input
-              type="url"
-              name="website"
-              value={formData.website}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50"
-              placeholder="Ex: https://monsite.fr"
+              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50 transition"
+              placeholder="Ex: 01 23 45 67 89"
+              autoComplete="tel"
             />
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-text font-semibold mb-2">
-              Catégorie <span className="text-error">*</span>
+            <label className="block text-text font-semibold text-sm mb-1.5 flex items-center gap-2">
+              Votre secteur <span className="text-error">*</span>
+              {formData.category && <CheckCircle2 className="w-4 h-4 text-success" />}
             </label>
             <select
               name="category"
               value={formData.category}
               onChange={handleInputChange}
               disabled={loading}
-              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50"
+              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50 transition"
             >
               <option value="">Sélectionner une catégorie</option>
               {CATEGORIES.map(cat => (
@@ -261,34 +285,37 @@ export default function BusinessCreation() {
             </select>
           </div>
 
-          {/* Opening Hours */}
-          <div>
-            <label className="block text-text font-semibold mb-2">
-              Horaires d'ouverture <span className="text-text-light text-sm">(optionnel, JSON)</span>
+          {/* Website (Optional) */}
+          <div className="pt-3 border-t border-border">
+            <label className="block text-text font-semibold text-xs mb-1.5">
+              Site web <span className="text-text-light">(optionnel)</span>
             </label>
-            <textarea
-              name="openingHours"
-              value={formData.openingHours}
+            <input
+              type="url"
+              name="website"
+              value={formData.website}
               onChange={handleInputChange}
               disabled={loading}
-              rows={4}
-              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50 font-mono text-sm"
-              placeholder={'{\n  "weekday_text": [\n    "Lundi: 08:00–19:00",\n    "Dimanche: Fermé"\n  ]\n}'}
+              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50 transition"
+              placeholder="https://monsite.fr"
+              autoComplete="url"
             />
-            <p className="text-xs text-text-light mt-1">
-              Laissez vide pour utiliser les horaires par défaut
-            </p>
           </div>
 
           {/* Toast */}
           {toast && (
             <div
-              className={`p-4 rounded-lg text-sm font-medium ${
+              className={`p-4 rounded-lg text-sm font-medium flex items-start gap-3 ${
                 toast.type === 'success'
                   ? 'bg-success/10 text-success border border-success'
                   : 'bg-error/10 text-error border border-error'
               }`}
             >
+              {toast.type === 'success' ? (
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              )}
               {toast.message}
             </div>
           )}
@@ -296,20 +323,55 @@ export default function BusinessCreation() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-secondary transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading || !formData.businessName || !formData.address || !formData.phone || !formData.category}
+            className="w-full px-6 py-2.5 bg-success hover:bg-opacity-90 disabled:bg-gray-300 text-white text-sm rounded-lg transition font-semibold disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
           >
-            {loading ? 'Création en cours...' : 'Créer mon commerce'}
+            {loading ? (
+              <>
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Création...
+              </>
+            ) : progressPercent === 100 ? (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                Créer mon commerce
+              </>
+            ) : (
+              'Complétez tous les champs'
+            )}
           </button>
         </form>
       </div>
 
-      {/* Info */}
+      {/* Plan Info Card */}
       {selectedPlan && (
-        <div className="mt-8 p-6 bg-info/10 border border-info rounded-lg text-center">
-          <p className="text-info text-sm">
-            <strong>Plan sélectionné:</strong> {selectedPlan.name} - {selectedPlan.price_monthly === 0 ? 'Gratuit' : `${selectedPlan.price_monthly}€/mois`}
-          </p>
+        <div className="mt-4 p-4 bg-primary/5 border border-primary rounded-lg">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-xs text-text-light">Plan</p>
+              <p className="text-sm font-bold text-text">
+                {selectedPlan.name}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-text-light">
+                {selectedPlan.price_monthly === 0 ? (
+                  'Gratuit'
+                ) : (
+                  <>
+                    {(selectedPlan.price_monthly / 100).toFixed(2).replace('.', ',')}€/mois
+                  </>
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="text-xs text-primary hover:text-secondary font-semibold"
+              >
+                Modifier
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -48,10 +48,10 @@ export default function Home() {
             clients en fidèles.
           </p>
           <a
-            href="/auth/login"
+            href="/become-pro"
             className="inline-block px-8 py-4 bg-success text-white rounded-lg hover:bg-opacity-90 transition font-semibold"
           >
-            Essayer maintenant
+            Devenir professionnel
           </a>
         </div>
       </Section>

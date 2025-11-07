@@ -3,9 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Zap, TrendingUp } from "lucide-react";
 import Header from "@/components/common/Header";
-import Footer from "@/components/common/Footer";
 import { createClient } from "@/lib/supabase/clients/browser";
 
 interface FormData {
@@ -134,165 +133,208 @@ export default function SignupPage() {
   return (
     <>
       <Header />
-      <main className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
+      <main className="min-h-screen bg-white">
+        {/* Container Principal */}
+        <div className="max-w-6xl mx-auto px-4 py-12 md:py-16">
           {/* Back Button */}
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-primary hover:text-secondary mb-8 transition"
+            className="inline-flex items-center gap-2 text-text hover:text-primary mb-8 transition text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à l'accueil
+            Retour
           </Link>
 
-          {/* Card */}
-          <div className="border border-border rounded-2xl p-8 bg-white">
-            <h1 className="text-3xl font-bold text-text mb-2">Devenir Pro</h1>
-            <p className="text-text-light mb-8">
-              Créez votre compte pour accéder à tous les outils de fidélisation.
-            </p>
+          {/* Grid: 2 colonnes sur desktop, 1 sur mobile */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-10 lg:gap-16 items-stretch">
 
-            {Object.keys(errors).some(key => errors[key as keyof FormErrors]) && (
-              <div className="p-4 bg-error/10 border border-error text-error text-sm rounded-lg mb-6">
-                {errors.email || errors.firstName || errors.lastName || errors.password || errors.confirmPassword}
+            {/* COLONNE GAUCHE: Bénéfices et contexte */}
+            <div className="flex flex-col justify-center">
+              <div className="mb-12">
+                <h1 className="text-4xl md:text-5xl font-bold text-text mb-4 leading-tight">
+                  Fidélisez vos clients sans effort
+                </h1>
+                <p className="text-base md:text-lg text-text-light leading-relaxed">
+                  Un seul système. NFC, QR codes, avis Google et récompenses automatisées.
+                </p>
               </div>
-            )}
 
-            <form onSubmit={handleSignUp} className="space-y-4">
-              {/* Prénom et Nom sur la même ligne */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-text font-semibold mb-2">
-                    Prénom <span className="text-error">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) => updateFormData("firstName", e.target.value)}
-                    disabled={loading}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none disabled:bg-gray-50 ${
-                      errors.firstName
-                        ? "border-error focus:border-error"
-                        : "border-border focus:border-primary"
-                    }`}
-                    placeholder="Votre prénom"
-                  />
-                  {errors.firstName && (
-                    <p className="text-error text-xs mt-1">{errors.firstName}</p>
-                  )}
+              {/* 3 Bénéfices Clés */}
+              <div className="space-y-5">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 mt-1">
+                    <Zap className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-text text-base mb-1">Simple & rapide</h3>
+                    <p className="text-sm text-text-light">Points en une seconde avec NFC ou QR code</p>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-text font-semibold mb-2">
-                    Nom <span className="text-error">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(e) => updateFormData("lastName", e.target.value)}
-                    disabled={loading}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none disabled:bg-gray-50 ${
-                      errors.lastName
-                        ? "border-error focus:border-error"
-                        : "border-border focus:border-primary"
-                    }`}
-                    placeholder="Votre nom"
-                  />
-                  {errors.lastName && (
-                    <p className="text-error text-xs mt-1">{errors.lastName}</p>
-                  )}
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 mt-1">
+                    <CheckCircle2 className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-text text-base mb-1">Automatisé</h3>
+                    <p className="text-sm text-text-light">Récompenses et avis Google sans intervention</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 mt-1">
+                    <TrendingUp className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-text text-base mb-1">Résultats</h3>
+                    <p className="text-sm text-text-light">Fidélisation réelle mesurable</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Email */}
-              <div>
-                <label className="block text-text font-semibold mb-2">
-                  Email <span className="text-error">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => updateFormData("email", e.target.value)}
-                  disabled={loading}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none disabled:bg-gray-50 ${
-                    errors.email
-                      ? "border-error focus:border-error"
-                      : "border-border focus:border-primary"
-                  }`}
-                  placeholder="votre@email.com"
-                />
-                {errors.email && (
-                  <p className="text-error text-xs mt-1">{errors.email}</p>
-                )}
+              {/* Stat ou Trust Signal */}
+              <div className="mt-12 pt-8 border-t border-border">
+                <p className="text-sm text-text-light mb-2">Pour les pros</p>
+                <p className="text-2xl font-bold text-text">Zéro config technique</p>
               </div>
+            </div>
 
-              {/* Mot de passe */}
-              <div>
-                <label className="block text-text font-semibold mb-2">
-                  Mot de passe <span className="text-error">*</span>
-                </label>
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => updateFormData("password", e.target.value)}
-                  disabled={loading}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none disabled:bg-gray-50 ${
-                    errors.password
-                      ? "border-error focus:border-error"
-                      : "border-border focus:border-primary"
-                  }`}
-                  placeholder="••••••••"
-                />
-                {errors.password ? (
-                  <p className="text-error text-xs mt-1">{errors.password}</p>
-                ) : (
-                  <p className="text-xs text-text-light mt-1">
-                    Minimum 6 caractères
-                  </p>
+            {/* COLONNE DROITE: Formulaire */}
+            <div>
+              <div className="bg-gray-50 rounded-2xl p-8">
+                <h2 className="text-2xl font-bold text-text mb-2">Créer mon compte</h2>
+                <p className="text-text-light text-sm mb-6">
+                  Gratuit, 2 minutes
+                </p>
+
+                {Object.keys(errors).some(key => errors[key as keyof FormErrors]) && (
+                  <div className="p-4 bg-error/10 border border-error text-error text-sm rounded-lg mb-6">
+                    {errors.email || errors.firstName || errors.lastName || errors.password || errors.confirmPassword}
+                  </div>
                 )}
+
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  {/* Prénom et Nom */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <input
+                        type="text"
+                        value={formData.firstName}
+                        onChange={(e) => updateFormData("firstName", e.target.value)}
+                        disabled={loading}
+                        className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                          errors.firstName
+                            ? "border-error focus:border-error"
+                            : "border-border focus:border-primary"
+                        }`}
+                        placeholder="Prénom"
+                        autoComplete="given-name"
+                      />
+                      {errors.firstName && (
+                        <p className="text-error text-xs mt-1">{errors.firstName}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <input
+                        type="text"
+                        value={formData.lastName}
+                        onChange={(e) => updateFormData("lastName", e.target.value)}
+                        disabled={loading}
+                        className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                          errors.lastName
+                            ? "border-error focus:border-error"
+                            : "border-border focus:border-primary"
+                        }`}
+                        placeholder="Nom"
+                        autoComplete="family-name"
+                      />
+                      {errors.lastName && (
+                        <p className="text-error text-xs mt-1">{errors.lastName}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => updateFormData("email", e.target.value)}
+                      disabled={loading}
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                        errors.email
+                          ? "border-error focus:border-error"
+                          : "border-border focus:border-primary"
+                      }`}
+                      placeholder="votre@email.com"
+                      autoComplete="email"
+                    />
+                    {errors.email && (
+                      <p className="text-error text-xs mt-1">{errors.email}</p>
+                    )}
+                  </div>
+
+                  {/* Mot de passe */}
+                  <div>
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => updateFormData("password", e.target.value)}
+                      disabled={loading}
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                        errors.password
+                          ? "border-error focus:border-error"
+                          : "border-border focus:border-primary"
+                      }`}
+                      placeholder="Min. 6 caractères"
+                      autoComplete="new-password"
+                    />
+                    {errors.password && (
+                      <p className="text-error text-xs mt-1">{errors.password}</p>
+                    )}
+                  </div>
+
+                  {/* Confirmer mot de passe */}
+                  <div>
+                    <input
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => updateFormData("confirmPassword", e.target.value)}
+                      disabled={loading}
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                        errors.confirmPassword
+                          ? "border-error focus:border-error"
+                          : "border-border focus:border-primary"
+                      }`}
+                      placeholder="Confirmer"
+                      autoComplete="new-password"
+                    />
+                    {errors.confirmPassword && (
+                      <p className="text-error text-xs mt-1">{errors.confirmPassword}</p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full px-6 py-3 bg-success hover:bg-opacity-90 text-white rounded-lg transition font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                  >
+                    {loading ? "Création..." : "Créer mon compte"}
+                  </button>
+                </form>
+
+                <p className="text-center text-text-light text-sm mt-6">
+                  Vous avez un compte ?{" "}
+                  <Link href="/auth/login" className="text-primary hover:text-secondary transition font-semibold">
+                    Se connecter
+                  </Link>
+                </p>
               </div>
-
-              {/* Confirmer mot de passe */}
-              <div>
-                <label className="block text-text font-semibold mb-2">
-                  Confirmer le mot de passe <span className="text-error">*</span>
-                </label>
-                <input
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => updateFormData("confirmPassword", e.target.value)}
-                  disabled={loading}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none disabled:bg-gray-50 ${
-                    errors.confirmPassword
-                      ? "border-error focus:border-error"
-                      : "border-border focus:border-primary"
-                  }`}
-                  placeholder="••••••••"
-                />
-                {errors.confirmPassword && (
-                  <p className="text-error text-xs mt-1">{errors.confirmPassword}</p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full px-6 py-3 bg-success text-white rounded-lg hover:bg-opacity-90 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Inscription en cours..." : "Créer mon compte"}
-              </button>
-            </form>
-
-            <p className="text-center text-text-light text-sm mt-6">
-              Vous avez déjà un compte ?{" "}
-              <Link href="/auth/login" className="text-primary hover:text-secondary transition font-semibold">
-                Se connecter
-              </Link>
-            </p>
+            </div>
           </div>
         </div>
       </main>
-      <Footer />
     </>
   );
 }

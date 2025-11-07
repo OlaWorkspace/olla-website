@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, ShoppingCart, CreditCard, Users, HelpCircle, LifeBuoy } from "lucide-react";
 import LogOutButton from "@/components/common/LogOutButton";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/clients/browser";
 
 const menuItems = [
   {
@@ -40,17 +42,42 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [userName, setUserName] = useState<string>('');
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: dbUser } = await supabase
+          .from('users')
+          .select('user_firstname, user_lastname')
+          .eq('auth_id', user.id)
+          .single();
+
+        if (dbUser) {
+          setUserName(`${dbUser.user_firstname} ${dbUser.user_lastname}`);
+        }
+      }
+    };
+
+    fetchUserName();
+  }, []);
 
   return (
     <aside className="w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col">
-      {/* Logo */}
+      {/* User Info */}
       <div className="p-6 border-b border-slate-700">
-        <Link href="/pro" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold">
-            O
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+            {userName ? userName.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
           </div>
-          <span className="font-bold text-lg">Olla</span>
-        </Link>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm truncate">{userName || 'Utilisateur'}</p>
+            <p className="text-xs text-slate-400">Espace Pro</p>
+          </div>
+        </div>
       </div>
 
       {/* Menu */}

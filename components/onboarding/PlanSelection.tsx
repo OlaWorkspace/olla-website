@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Zap } from 'lucide-react';
+import { Check, Zap, ArrowRight } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import type { Plan } from '@/types';
@@ -49,6 +49,12 @@ export default function PlanSelection() {
     }, 300);
   };
 
+  // Helper function to format price from cents to euros
+  const formatPrice = (priceInCents: number) => {
+    if (priceInCents === 0) return 'Gratuit';
+    return `${(priceInCents / 100).toFixed(2).replace('.', ',')}€`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -84,81 +90,97 @@ export default function PlanSelection() {
     );
   }
 
+  // Find recommended plan (Premium or highest value plan)
+  const recommendedPlan = plans.find(p => p.slug === 'premium') || plans.find(p => p.slug === 'pro') || plans[0];
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold text-text mb-4">
-          Choisissez votre plan d'abonnement
+        <h1 className="text-3xl md:text-4xl font-bold text-text mb-2 leading-tight">
+          Choisissez le plan qui vous convient
         </h1>
-        <p className="text-text-light text-lg">
-          Tous nos plans incluent l'accès complet à la plateforme de fidélisation.
-          Vous pourrez toujours changer de plan plus tard.
+        <p className="text-text-light text-base leading-relaxed">
+          Accès complet à tous les outils. Changez de plan à tout moment.
         </p>
       </div>
 
-      {/* Plans Grid */}
-      <div className="grid md:grid-cols-3 gap-8">
+      {/* Plans Grid - High Conversion Design */}
+      <div className="grid md:grid-cols-3 gap-4 lg:gap-6">
         {plans.map((plan) => {
-          const isProPlan = plan.slug === 'pro';
+          const isComingSoon = plan.slug === 'pro';
           const isSelected = selectedSlug === plan.slug;
+          const isRecommended = plan.id === recommendedPlan.id && !isComingSoon;
+          const isHighlighted = isRecommended && !isSelected;
 
           return (
             <div
               key={plan.id}
-              className={`relative rounded-2xl border-2 transition-all duration-300 ${
-                isSelected
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/30'
-              } ${isProPlan ? 'opacity-60' : ''}`}
+              className={`relative rounded-2xl border-2 transition-all duration-300 overflow-hidden group ${
+                isComingSoon
+                  ? 'border-border opacity-60 bg-gray-50'
+                  : isSelected
+                  ? 'border-success bg-success/5 shadow-lg'
+                  : isHighlighted
+                  ? 'border-success bg-white shadow-xl md:scale-105'
+                  : 'border-border hover:border-primary/50 bg-white hover:shadow-md'
+              }`}
             >
-              {/* Badge "Soon" for Pro plan */}
-              {isProPlan && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="inline-block px-3 py-1 bg-primary/20 text-primary text-xs font-semibold rounded-full">
-                    Bientôt disponible
-                  </span>
+              {/* Recommended Badge */}
+              {isRecommended && (
+                <div className="absolute top-0 left-0 right-0 bg-success text-white text-center py-1.5 text-xs font-bold uppercase tracking-wide">
+                  Recommandé
                 </div>
               )}
 
-              <div className="p-8">
+              {/* Coming Soon Badge */}
+              {isComingSoon && (
+                <div className="absolute top-0 left-0 right-0 bg-gray-300 text-gray-600 text-center py-1.5 text-xs font-bold uppercase tracking-wide">
+                  Bientôt disponible
+                </div>
+              )}
+
+              <div className={`p-6 ${isRecommended || isComingSoon ? 'pt-10' : ''} h-full flex flex-col`}>
                 {/* Plan Header */}
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-text mb-2">
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-text mb-1">
                     {plan.name}
                   </h3>
-                  <p className="text-text-light text-sm">
+                  <p className="text-text-light text-xs h-8 line-clamp-2">
                     {plan.description}
                   </p>
                 </div>
 
                 {/* Pricing */}
                 <div className="mb-6 pb-6 border-b border-border">
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-text">
-                      {plan.price_monthly === 0 ? 'Gratuit' : `${plan.price_monthly}€`}
+                      {formatPrice(plan.price_monthly)}
                     </span>
                     {plan.price_monthly > 0 && (
-                      <span className="text-text-light">/mois</span>
+                      <span className="text-text-light text-sm">/mois</span>
                     )}
                   </div>
+                  {plan.price_monthly === 0 && (
+                    <p className="text-xs text-text-light mt-1">Parfait pour débuter</p>
+                  )}
                 </div>
 
                 {/* Features */}
-                <div className="mb-8 space-y-3">
+                <div className="mb-6 space-y-2 flex-grow">
                   {plan.features && Array.isArray(plan.features) && plan.features.map((feature, idx) => (
                     <div key={idx} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                      <span className="text-text text-sm">{feature}</span>
+                      <span className="text-text text-sm leading-snug">{feature}</span>
                     </div>
                   ))}
 
                   {/* Max loyalty programs info */}
                   {plan.max_loyalty_programs && (
-                    <div className="flex items-start gap-3 pt-3 border-t border-border/50">
-                      <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-3 pt-3 border-t border-border/50 mt-4">
+                      <Zap className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
                       <span className="text-text text-sm font-semibold">
-                        Jusqu'à {plan.max_loyalty_programs} programmes de fidélité
+                        Jusqu'à {plan.max_loyalty_programs} programmes
                       </span>
                     </div>
                   )}
@@ -167,16 +189,30 @@ export default function PlanSelection() {
                 {/* CTA Button */}
                 <button
                   onClick={() => handleSelectPlan(plan)}
-                  disabled={isProPlan || selectedSlug === plan.slug}
-                  className={`w-full py-3 rounded-lg font-semibold transition ${
-                    isProPlan
+                  disabled={isComingSoon || isSelected}
+                  className={`w-full py-3 px-6 rounded-lg font-semibold transition flex items-center justify-center gap-2 ${
+                    isComingSoon
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       : isSelected
-                      ? 'bg-primary text-white'
+                      ? 'bg-success text-white'
+                      : isHighlighted
+                      ? 'bg-success hover:bg-opacity-90 text-white shadow-md'
                       : 'bg-gray-100 text-text hover:bg-primary hover:text-white'
                   }`}
                 >
-                  {selectedSlug === plan.slug ? 'Sélectionné ✓' : 'Choisir ce plan'}
+                  {isSelected && (
+                    <>
+                      <Check className="w-5 h-5" />
+                      Sélectionné
+                    </>
+                  )}
+                  {!isSelected && !isComingSoon && (
+                    <>
+                      Choisir ce plan
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                  {isComingSoon && 'Bientôt'}
                 </button>
               </div>
             </div>
@@ -184,10 +220,11 @@ export default function PlanSelection() {
         })}
       </div>
 
-      {/* Info Notice */}
-      <div className="bg-info/10 border border-info rounded-lg p-6 text-center max-w-2xl mx-auto">
-        <p className="text-info text-sm">
-          💡 <strong>Info:</strong> Vous pouvez essayer notre plateforme avec le plan gratuit avant de passer à un plan payant.
+      {/* Trust Signal & CTA */}
+      <div className="bg-success/10 border border-success rounded-xl p-4 text-center max-w-xl mx-auto">
+        <p className="text-success font-semibold text-sm mb-1">✓ Pas de carte bancaire requise</p>
+        <p className="text-text text-xs">
+          Essayez gratuitement dès maintenant.
         </p>
       </div>
     </div>
