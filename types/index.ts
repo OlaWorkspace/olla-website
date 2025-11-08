@@ -18,6 +18,13 @@ export interface Plan {
   features: string[];
   max_loyalty_programs: number | null;
   display_order: number;
+  promotion_enabled?: boolean;
+  promotion_label?: string | null;
+  promotion_months_free?: number;
+  promotion_quantity_limit?: number | null;
+  promotion_quantity_used?: number;
+  promotion_start_date?: string | null;
+  promotion_end_date?: string | null;
 }
 
 export interface BusinessData {

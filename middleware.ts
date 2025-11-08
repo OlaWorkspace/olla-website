@@ -25,10 +25,32 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Rafraîchir la session automatiquement
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
+
+  // Si l'utilisateur est connecté et va sur /auth/login, le rediriger vers son espace
+  if (user && request.nextUrl.pathname === '/auth/login') {
+    // Récupérer le rôle de l'utilisateur
+    const { data: userData } = await supabase
+      .from('users')
+      .select('pro, admin')
+      .eq('auth_id', user.id)
+      .single();
+
+    if (userData) {
+      if (userData.admin) {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      } else if (userData.pro) {
+        return NextResponse.redirect(new URL('/pro', request.url));
+      } else {
+        return NextResponse.redirect(new URL('/', request.url));
+      }
+    }
+  }
 
   // Protéger /pro et /onboarding sans user
-  if ((request.nextUrl.pathname.startsWith('/pro') || request.nextUrl.pathname.startsWith('/onboarding')) && !user) {
+  if ((request.nextUrl.pathname.startsWith('/pro') || request.nextUrl.pathname.startsWith('/onboarding') || request.nextUrl.pathname.startsWith('/admin')) && !user) {
     const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('from', request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);

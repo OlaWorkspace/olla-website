@@ -12,6 +12,13 @@ interface SubscriptionPlan {
   features: string[];
   max_loyalty_programs: number | null;
   is_active: boolean;
+  promotion_enabled?: boolean;
+  promotion_label?: string | null;
+  promotion_months_free?: number;
+  promotion_quantity_limit?: number | null;
+  promotion_quantity_used?: number;
+  promotion_start_date?: string | null;
+  promotion_end_date?: string | null;
 }
 
 interface SubscriptionStatus {
@@ -229,7 +236,12 @@ export default function AbonnementsPage() {
             >
               {/* Header */}
               <div className="mb-4">
-                {isPremium && !isInactive && (
+                {plan.promotion_enabled && plan.promotion_label && (
+                  <span className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-semibold px-2 py-1 rounded mb-2">
+                    {plan.promotion_label}
+                  </span>
+                )}
+                {isPremium && !isInactive && !plan.promotion_enabled && (
                   <span className="inline-block bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded mb-2">
                     Recommandé
                   </span>
@@ -250,9 +262,24 @@ export default function AbonnementsPage() {
 
               {/* Price */}
               <div className="mb-6">
-                <div className="text-3xl font-bold text-slate-900">
-                  {formatPrice(plan.price_monthly)}
-                </div>
+                {plan.promotion_enabled && plan.promotion_months_free && plan.promotion_months_free > 0 ? (
+                  <>
+                    <div className="text-3xl font-bold text-slate-900">
+                      0,00€
+                      <span className="text-sm font-normal text-slate-600">/mois</span>
+                    </div>
+                    <p className="text-xs text-purple-600 font-semibold mt-1">
+                      pendant {plan.promotion_months_free} mois
+                    </p>
+                    <p className="text-xs text-slate-500 line-through mt-1">
+                      Puis {(plan.price_monthly / 100).toFixed(2)}€/mois
+                    </p>
+                  </>
+                ) : (
+                  <div className="text-3xl font-bold text-slate-900">
+                    {formatPrice(plan.price_monthly)}
+                  </div>
+                )}
               </div>
 
               {/* Features */}
