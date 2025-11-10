@@ -30,20 +30,6 @@ export const metadata: Metadata = {
     description: "Un seul système pour tous vos commerces : NFC, QR, avis Google et récompenses.",
     images: ["/logo-fond-bleu.png"],
   },
-  icons: {
-    icon: [
-      {
-        url: "/logo-fond-bleu.png",
-        type: "image/png",
-      }
-    ],
-    apple: [
-      {
-        url: "/logo-fond-bleu.png",
-        type: "image/png",
-      }
-    ],
-  },
 };
 
 export default function RootLayout({
