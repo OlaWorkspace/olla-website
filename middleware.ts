@@ -25,9 +25,8 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Rafraîchir la session automatiquement
-  const { data: { session } } = await supabase.auth.getSession();
-  const user = session?.user;
+  // Récupérer l'utilisateur de manière sécurisée (authentification via serveur Supabase)
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Si l'utilisateur est connecté et va sur /auth/login, le rediriger vers son espace
   if (user && request.nextUrl.pathname === '/auth/login') {
