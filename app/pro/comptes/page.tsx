@@ -35,6 +35,13 @@ export default function ComptesPage() {
     lastName: '',
     email: '',
   });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -147,6 +154,51 @@ export default function ComptesPage() {
     console.log('Saving profile:', formData);
   };
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setPasswordError(null);
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordError(null);
+    setPasswordSuccess(false);
+
+    // Validation
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
+      });
+
+      if (error) throw error;
+
+      setPasswordSuccess(true);
+      setPasswordData({ newPassword: '', confirmPassword: '' });
+
+      // Fermer le modal après 2 secondes
+      setTimeout(() => {
+        setShowPasswordModal(false);
+        setPasswordSuccess(false);
+      }, 2000);
+    } catch (err) {
+      setPasswordError(err instanceof Error ? err.message : 'Erreur lors du changement de mot de passe');
+    }
+  };
+
   return (
     <div>
       <h1 className="text-4xl font-bold text-slate-900 mb-2">
@@ -221,69 +273,14 @@ export default function ComptesPage() {
           </div>
         </div>
 
-        {/* Commerces associés */}
-        {data.businesses.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">Commerces associés</h2>
-              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                {data.businesses.length}
-              </span>
-            </div>
-            <div className="space-y-3">
-              {data.businesses.map((business) => (
-                <div
-                  key={business.id}
-                  className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition"
-                >
-                  <div>
-                    <p className="font-semibold text-slate-900">{business.name}</p>
-                    <p className="text-sm text-slate-600">{business.category}</p>
-                    {business.address && (
-                      <p className="text-xs text-slate-500 mt-1">{business.address}</p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                        business.active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-slate-100 text-slate-800'
-                      }`}
-                    >
-                      {business.active ? 'Actif' : 'Inactif'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Utilisateurs de l'équipe */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Équipe</h2>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!data.subscription || data.subscription.plan.slug === 'free'}
-              title={!data.subscription || data.subscription.plan.slug === 'free' ? 'Upgrade pour ajouter des utilisateurs' : ''}
-            >
-              Ajouter un utilisateur
-            </button>
-          </div>
-          <div className="text-center py-8">
-            <p className="text-slate-500">Aucun utilisateur supplémentaire</p>
-            {!data.subscription || data.subscription.plan.slug === 'free' && (
-              <p className="text-xs text-slate-400 mt-2">Upgrade votre plan pour inviter d'autres utilisateurs</p>
-            )}
-          </div>
-        </div>
-
         {/* Sécurité */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Sécurité</h2>
           <div className="space-y-4">
-            <button className="border border-slate-300 hover:bg-slate-50 text-slate-900 font-semibold px-6 py-3 rounded-lg transition w-full md:w-auto">
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="border border-slate-300 hover:bg-slate-50 text-slate-900 font-semibold px-6 py-3 rounded-lg transition w-full md:w-auto"
+            >
               Changer le mot de passe
             </button>
             <div className="pt-4 border-t border-slate-200">
@@ -316,6 +313,93 @@ export default function ComptesPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de changement de mot de passe */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900">Changer le mot de passe</h3>
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordData({ newPassword: '', confirmPassword: '' });
+                  setPasswordError(null);
+                  setPasswordSuccess(false);
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {passwordSuccess ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p className="text-green-800 text-center font-medium">Mot de passe modifié avec succès !</p>
+              </div>
+            ) : (
+              <>
+                {passwordError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <p className="text-red-800 text-sm">{passwordError}</p>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Nouveau mot de passe
+                    </label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Minimum 6 caractères"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Confirmer le mot de passe
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Ressaisissez le mot de passe"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={() => {
+                        setShowPasswordModal(false);
+                        setPasswordData({ newPassword: '', confirmPassword: '' });
+                        setPasswordError(null);
+                      }}
+                      className="flex-1 border border-slate-300 hover:bg-slate-50 text-slate-900 font-semibold px-4 py-2 rounded-lg transition"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={handleChangePassword}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition"
+                    >
+                      Confirmer
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

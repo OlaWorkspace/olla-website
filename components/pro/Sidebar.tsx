@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ShoppingCart, CreditCard, Users, HelpCircle, LifeBuoy } from "lucide-react";
+import { LayoutDashboard, Settings, CreditCard, Users, HelpCircle, LifeBuoy } from "lucide-react";
 import LogOutButton from "@/components/common/LogOutButton";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/clients/browser";
@@ -14,9 +14,9 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    label: "Shop",
-    href: "/pro/shop",
-    icon: ShoppingCart,
+    label: "Paramètres",
+    href: "/pro/parametres",
+    icon: Settings,
   },
   {
     label: "Abonnements",
@@ -108,7 +108,7 @@ export default function Sidebar() {
 
       {/* Logout */}
       <div className="p-4 border-t border-slate-700">
-        <LogOutButton className="w-full bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition-colors" />
+        <LogOutButton className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm" />
       </div>
     </aside>
   );

@@ -12,7 +12,7 @@ export default function ConditionalLayout({
   const pathname = usePathname();
 
   // Routes qui ne doivent PAS avoir Header/Footer
-  const noLayoutRoutes = ['/pro', '/auth', '/onboarding'];
+  const noLayoutRoutes = ['/pro', '/auth', '/onboarding', '/admin'];
   const shouldHideLayout = noLayoutRoutes.some(route => pathname.startsWith(route));
 
   if (shouldHideLayout) {

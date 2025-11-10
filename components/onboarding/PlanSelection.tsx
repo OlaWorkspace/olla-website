@@ -127,9 +127,16 @@ export default function PlanSelection() {
               }`}
             >
               {/* Recommended Badge */}
-              {isRecommended && (
+              {isRecommended && !plan.promotion_enabled && (
                 <div className="absolute top-0 left-0 right-0 bg-success text-white text-center py-1.5 text-xs font-bold uppercase tracking-wide">
                   Recommandé
+                </div>
+              )}
+
+              {/* Promotion Badge */}
+              {plan.promotion_enabled && plan.promotion_label && (
+                <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center py-1.5 text-xs font-bold uppercase tracking-wide">
+                  {plan.promotion_label}
                 </div>
               )}
 
@@ -140,7 +147,7 @@ export default function PlanSelection() {
                 </div>
               )}
 
-              <div className={`p-6 ${isRecommended || isComingSoon ? 'pt-10' : ''} h-full flex flex-col`}>
+              <div className={`p-6 ${isRecommended || isComingSoon || plan.promotion_enabled ? 'pt-10' : ''} h-full flex flex-col`}>
                 {/* Plan Header */}
                 <div className="mb-4">
                   <h3 className="text-xl font-bold text-text mb-1">
@@ -153,16 +160,35 @@ export default function PlanSelection() {
 
                 {/* Pricing */}
                 <div className="mb-6 pb-6 border-b border-border">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-text">
-                      {formatPrice(plan.price_monthly)}
-                    </span>
-                    {plan.price_monthly > 0 && (
-                      <span className="text-text-light text-sm">/mois</span>
-                    )}
-                  </div>
-                  {plan.price_monthly === 0 && (
-                    <p className="text-xs text-text-light mt-1">Parfait pour débuter</p>
+                  {plan.promotion_enabled && plan.promotion_months_free && plan.promotion_months_free > 0 ? (
+                    <>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-text">
+                          0,00€
+                        </span>
+                        <span className="text-text-light text-sm">/mois</span>
+                      </div>
+                      <p className="text-xs text-purple-600 font-semibold mt-1">
+                        pendant {plan.promotion_months_free} mois
+                      </p>
+                      <p className="text-xs text-text-light line-through mt-1">
+                        Puis {(plan.price_monthly / 100).toFixed(2).replace('.', ',')}€/mois
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-text">
+                          {formatPrice(plan.price_monthly)}
+                        </span>
+                        {plan.price_monthly > 0 && (
+                          <span className="text-text-light text-sm">/mois</span>
+                        )}
+                      </div>
+                      {plan.price_monthly === 0 && (
+                        <p className="text-xs text-text-light mt-1">Parfait pour débuter</p>
+                      )}
+                    </>
                   )}
                 </div>
 
