@@ -1,5 +1,7 @@
+import Section from "@/components/marketing/Section";
+import FeatureCard from "@/components/marketing/FeatureCard";
 import { type Metadata } from "next";
-import { Zap, Smartphone, Shield, Gift, Check, TrendingUp, Users, Award, BarChart3, Lock, QrCode, Star, Bell, Clock, Store, MapPinHouse } from "lucide-react";
+import { Zap, CheckCircle, Award, BarChart3, Share2, Lock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Fonctionnalités — Olla",
@@ -9,215 +11,100 @@ export const metadata: Metadata = {
 export default function FeaturesPage() {
   return (
     <>
-      {/* Hero Section */}
-      {/* <section className="relative bg-gradient-to-b from-white to-gray-50 overflow-hidden pt-8 pb-8"> */}
-        {/* Decorative Elements */}
-        {/* <div className="absolute top-20 right-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
-
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="text-center  mx-auto">
-
-
-            <h1 className="text-5xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              Tout ce qu'il vous faut pour <span className="text-primary">fidéliser vos clients</span>
-            </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
-              Une solution complète, moderne et facile à utiliser pour gérer votre programme de fidélité en toute simplicité
-            </p>
-          </div>
-        </div>
-      </section> */}
-
-      {/* Main Features Grid */}
-      <section className="py-8 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl lg:text-5xl font-bold text-gray-900 mb-2 leading-tight">
-              Tout ce qu'il vous faut pour <span className="text-primary">fidéliser vos clients</span>
-            </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
-              Une solution complète, moderne et facile à utiliser pour gérer votre programme de fidélité en toute simplicité
-            </p>
-          </div>
-
-
-
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <Gift className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Fidélité personnalisable</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Choisissez les paliers, les récompenses, les conditions d'utilisation. Votre programme s’adapte à votre activité.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <Star className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Avis Google intégrés</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Vos clients peuvent vous un avis en un clic. Augmentez votre visibilité et votre réputation locale.              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <MapPinHouse className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Réseau de commerce</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Votre commerce apparaît dans Olla aux côtés de tous les autres membres du réseau. Les clients vous découvrent naturellement autour d’eux.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <Bell className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Communiquez avec vos clients</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Alertez vos clients au bon moment. Notifications push pour les nouvelles récompenses, offres spéciales et rappels.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <BarChart3 className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Statistiques en temps réel</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Suivez vos visites, l’engagement, l’attribution des récompenses et les tendances en un coup d’œil.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <Clock className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Configuration rapide</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Lancez votre programme en moins de 5 minutes. Interface intuitive et assistance pour démarrer rapidement.
-              </p>
-            </div>      
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <QrCode className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Scan NFC & QR Code</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Vos clients cumulent des points instantanément avec un simple scan. Compatible NFC et QR code pour une expérience ultra-rapide.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <Users className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Multi-commerces</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Gérez plusieurs points de vente depuis un seul tableau de bord. Centralisez toutes vos données et simplifiez la gestion.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                <Shield className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Sécurité maximale</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Vos données et celles de vos clients sont chiffrées et protégées. QR codes éphémères pour une sécurité renforcée.
-              </p>
-            </div>
-
-
-
-
-
-
-
-          </div>
-        </div>
-      </section>
-
-      {/* Detailed Feature 1 */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            
-            <div>
-
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Construisez une fidélité qui vous ressemble
-              </h2>
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Définissez vos règles en quelques clics. Points, paliers, récompenses : tout est modulable pour s’adapter parfaitement à votre activité et à votre clientèle.
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
-                    <Check className="w-4 h-4 text-white stroke-[3]" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Gains sur mesure</h3>
-                    <p className="text-gray-600">Fixez le nombre de points nécessaires pour chaque récompenses</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
-                    <Check className="w-4 h-4 text-white stroke-[3]" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Paliers multiples</h3>
-                    <p className="text-gray-600">Proposez plusieurs niveaux d'avantages pour engager tous vos clients.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
-                    <Check className="w-4 h-4 text-white stroke-[3]" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Récompenses à votre image</h3>
-                    <p className="text-gray-600">Choisissez les avantages que vous souhaitez offrir.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl p-12 flex items-center justify-center h-[400px]">
-              <div className="text-center">
-                <Gift className="w-24 h-24 text-primary mx-auto mb-4" />
-                <p className="text-gray-600 font-medium">Interface de gestion des récompenses</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-primary to-secondary">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-            Prêt à booster votre fidélisation ?
-          </h2>
-          <p className="text-xl text-blue-100 mb-10 leading-relaxed">
-            Rejoignez les commerces qui utilisent Olla pour fidéliser leurs clients et augmenter leurs ventes.
+      <Section>
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-text mb-4">
+            Des fonctionnalités puissantes
+          </h1>
+          <p className="text-xl text-text-light max-w-2xl mx-auto">
+            Tout ce qu'il faut pour gérer la fidélité de vos clients en un
+            seul endroit.
           </p>
-          <a
-            href="/become-pro"
-            className="inline-flex items-center gap-3 px-10 py-5 bg-white text-primary rounded-2xl font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 text-lg"
-          >
-            <Store className="w-5 h-5" />
-            <span>Devenir professionnel</span>
-          </a>
         </div>
-      </section>
+      </Section>
+
+      {/* Core Features */}
+      <Section className="bg-gray-50 rounded-3xl">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-bold text-text mb-4">Fonctionnalités principales</h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          <FeatureCard
+            icon={<Zap className="w-6 h-6 text-success" />}
+            title="Scan NFC/QR"
+            description="Système de points instantané. Vos clients cumulent des points en 1 seconde."
+          />
+          <FeatureCard
+            icon={<CheckCircle className="w-6 h-6 text-success" />}
+            title="Avis Google"
+            description="Intégration automatique avec Google. Boostez votre visibilité."
+          />
+          <FeatureCard
+            icon={<Award className="w-6 h-6 text-success" />}
+            title="Récompenses"
+            description="Système automatisé de récompenses personnalisées."
+          />
+          <FeatureCard
+            icon={<BarChart3 className="w-6 h-6 text-success" />}
+            title="Analytics"
+            description="Suivi en temps réel de vos données. Comprenez vos clients."
+          />
+          <FeatureCard
+            icon={<Share2 className="w-6 h-6 text-success" />}
+            title="Multi-commerces"
+            description="Gérez plusieurs points de vente depuis un seul tableau de bord."
+          />
+          <FeatureCard
+            icon={<Lock className="w-6 h-6 text-success" />}
+            title="Sécurité"
+            description="Vos données et celles de vos clients sont protégées."
+          />
+        </div>
+      </Section>
+
+      {/* Detailed Sections */}
+      <Section>
+        <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
+          <div>
+            <h2 className="text-3xl font-bold text-text mb-4">
+              Système de points flexible
+            </h2>
+            <p className="text-text-light mb-4">
+              Personnalisez le système de points selon vos besoins. Configurez
+              les seuils, les récompenses, et les périodes de validité.
+            </p>
+            <ul className="space-y-2 text-text">
+              <li>✓ Points personnalisables</li>
+              <li>✓ Récompenses variables</li>
+              <li>✓ Conditions flexibles</li>
+            </ul>
+          </div>
+          <div className="bg-gray-100 rounded-2xl p-8 h-64 flex items-center justify-center">
+            <p className="text-text-light">Visuel ici</p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="bg-gray-100 rounded-2xl p-8 h-64 flex items-center justify-center">
+            <p className="text-text-light">Visuel ici</p>
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-text mb-4">
+              Tableau de bord intuitif
+            </h2>
+            <p className="text-text-light mb-4">
+              Accédez à toutes vos données en un coup d'œil. Suivi des clients,
+              des transactions, des tendances.
+            </p>
+            <ul className="space-y-2 text-text">
+              <li>✓ Vue d'ensemble claire</li>
+              <li>✓ Rapports détaillés</li>
+              <li>✓ Exportations faciles</li>
+            </ul>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }

@@ -3,9 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Zap, TrendingUp, UserPlus, Mail, Lock, User } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Zap, TrendingUp } from "lucide-react";
 import Header from "@/components/common/Header";
-import Footer from "@/components/common/Footer";
 import { createClient } from "@/lib/supabase/clients/browser";
 
 interface FormData {
@@ -134,256 +133,208 @@ export default function SignupPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen ">
+      <main className="min-h-screen bg-white">
         {/* Container Principal */}
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16">
-
+          {/* Back Button */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-text hover:text-primary mb-8 transition text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Retour
+          </Link>
 
           {/* Grid: 2 colonnes sur desktop, 1 sur mobile */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-10 lg:gap-16 items-stretch">
 
             {/* COLONNE GAUCHE: Bénéfices et contexte */}
-            <div className="flex flex-col justify-center md:sticky md:top-8">
+            <div className="flex flex-col justify-center">
               <div className="mb-12">
-
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                  Fidélisez vos clients <span className="text-primary">sans effort</span>
+                <h1 className="text-4xl md:text-5xl font-bold text-text mb-4 leading-tight">
+                  Fidélisez vos clients sans effort
                 </h1>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Une seule solution. Programme de fidélité automatique, avis Google et suivi en temps réel.
+                <p className="text-base md:text-lg text-text-light leading-relaxed">
+                  Un seul système. NFC, QR codes, avis Google et récompenses automatisées.
                 </p>
               </div>
 
               {/* 3 Bénéfices Clés */}
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <Zap className="w-6 h-6 text-primary" />
-                    </div>
+                  <div className="flex-shrink-0 mt-1">
+                    <Zap className="w-5 h-5 text-success" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-1">Installation express</h3>
-                    <p className="text-gray-600">Un scan, un point. Simple, immédiat.</p>
+                    <h3 className="font-semibold text-text text-base mb-1">Simple & rapide</h3>
+                    <p className="text-sm text-text-light">Points en une seconde avec NFC ou QR code</p>
                   </div>
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <CheckCircle2 className="w-6 h-6 text-primary" />
-                    </div>
+                  <div className="flex-shrink-0 mt-1">
+                    <CheckCircle2 className="w-5 h-5 text-success" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-1">Automatisé</h3>
-                    <p className="text-gray-600">Récompenses et avis gérés automatiquement.</p>
+                    <h3 className="font-semibold text-text text-base mb-1">Automatisé</h3>
+                    <p className="text-sm text-text-light">Récompenses et avis Google sans intervention</p>
                   </div>
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-primary" />
-                    </div>
+                  <div className="flex-shrink-0 mt-1">
+                    <TrendingUp className="w-5 h-5 text-success" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-1">Impact concret</h3>
-                    <p className="text-gray-600">Plus de visites, plus d’habitués. Ça se voit dans les chiffres.</p>
+                    <h3 className="font-semibold text-text text-base mb-1">Résultats</h3>
+                    <p className="text-sm text-text-light">Fidélisation réelle mesurable</p>
                   </div>
                 </div>
               </div>
 
               {/* Stat ou Trust Signal */}
-              <div className="mt-12 pt-8 border-t border-gray-200">
-                <p className="text-2xl font-bold text-gray-900">Faites partie du réseau <span className="text-primary">Olla Fidelite</span> </p>
-                <p className="text-sm text-gray-500 mb-2">Apparaissez sur la carte aux côtés des autres commerces et laissez les clients vous découvrir naturellement.</p>
+              <div className="mt-12 pt-8 border-t border-border">
+                <p className="text-sm text-text-light mb-2">Pour les pros</p>
+                <p className="text-2xl font-bold text-text">Zéro config technique</p>
               </div>
             </div>
 
             {/* COLONNE DROITE: Formulaire */}
             <div>
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 lg:p-10">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Créer mon compte</h2>
-                <p className="text-gray-600 mb-8">
-                  Gratuit, sans engagement • 2 minutes
+              <div className="bg-gray-50 rounded-2xl p-8">
+                <h2 className="text-2xl font-bold text-text mb-2">Créer mon compte</h2>
+                <p className="text-text-light text-sm mb-6">
+                  Gratuit, 2 minutes
                 </p>
 
                 {Object.keys(errors).some(key => errors[key as keyof FormErrors]) && (
-                  <div className="p-4 bg-red-50 border border-red-200 text-red-800 text-sm rounded-2xl mb-6">
+                  <div className="p-4 bg-error/10 border border-error text-error text-sm rounded-lg mb-6">
                     {errors.email || errors.firstName || errors.lastName || errors.password || errors.confirmPassword}
                   </div>
                 )}
 
-                <form onSubmit={handleSignUp} className="space-y-5">
+                <form onSubmit={handleSignUp} className="space-y-4">
                   {/* Prénom et Nom */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-gray-900 font-semibold mb-2 text-sm">
-                        Prénom
-                      </label>
-                      <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          value={formData.firstName}
-                          onChange={(e) => updateFormData("firstName", e.target.value)}
-                          disabled={loading}
-                          className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                            errors.firstName
-                              ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                              : "border-gray-200 focus:border-primary focus:ring-primary/20"
-                          }`}
-                          placeholder="Jean"
-                          autoComplete="given-name"
-                          required
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        value={formData.firstName}
+                        onChange={(e) => updateFormData("firstName", e.target.value)}
+                        disabled={loading}
+                        className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                          errors.firstName
+                            ? "border-error focus:border-error"
+                            : "border-border focus:border-primary"
+                        }`}
+                        placeholder="Prénom"
+                        autoComplete="given-name"
+                      />
                       {errors.firstName && (
-                        <p className="text-red-600 text-xs mt-1.5">{errors.firstName}</p>
+                        <p className="text-error text-xs mt-1">{errors.firstName}</p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-gray-900 font-semibold mb-2 text-sm">
-                        Nom
-                      </label>
-                      <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          value={formData.lastName}
-                          onChange={(e) => updateFormData("lastName", e.target.value)}
-                          disabled={loading}
-                          className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                            errors.lastName
-                              ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                              : "border-gray-200 focus:border-primary focus:ring-primary/20"
-                          }`}
-                          placeholder="Dupont"
-                          autoComplete="family-name"
-                          required
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        value={formData.lastName}
+                        onChange={(e) => updateFormData("lastName", e.target.value)}
+                        disabled={loading}
+                        className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                          errors.lastName
+                            ? "border-error focus:border-error"
+                            : "border-border focus:border-primary"
+                        }`}
+                        placeholder="Nom"
+                        autoComplete="family-name"
+                      />
                       {errors.lastName && (
-                        <p className="text-red-600 text-xs mt-1.5">{errors.lastName}</p>
+                        <p className="text-error text-xs mt-1">{errors.lastName}</p>
                       )}
                     </div>
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="block text-gray-900 font-semibold mb-2 text-sm">
-                      Email professionnel
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => updateFormData("email", e.target.value)}
-                        disabled={loading}
-                        className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                          errors.email
-                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                            : "border-gray-200 focus:border-primary focus:ring-primary/20"
-                        }`}
-                        placeholder="votre@email.com"
-                        autoComplete="email"
-                        required
-                      />
-                    </div>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => updateFormData("email", e.target.value)}
+                      disabled={loading}
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                        errors.email
+                          ? "border-error focus:border-error"
+                          : "border-border focus:border-primary"
+                      }`}
+                      placeholder="votre@email.com"
+                      autoComplete="email"
+                    />
                     {errors.email && (
-                      <p className="text-red-600 text-xs mt-1.5">{errors.email}</p>
+                      <p className="text-error text-xs mt-1">{errors.email}</p>
                     )}
                   </div>
 
                   {/* Mot de passe */}
                   <div>
-                    <label className="block text-gray-900 font-semibold mb-2 text-sm">
-                      Mot de passe
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => updateFormData("password", e.target.value)}
-                        disabled={loading}
-                        className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                          errors.password
-                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                            : "border-gray-200 focus:border-primary focus:ring-primary/20"
-                        }`}
-                        placeholder="Minimum 6 caractères"
-                        autoComplete="new-password"
-                        required
-                      />
-                    </div>
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => updateFormData("password", e.target.value)}
+                      disabled={loading}
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                        errors.password
+                          ? "border-error focus:border-error"
+                          : "border-border focus:border-primary"
+                      }`}
+                      placeholder="Min. 6 caractères"
+                      autoComplete="new-password"
+                    />
                     {errors.password && (
-                      <p className="text-red-600 text-xs mt-1.5">{errors.password}</p>
+                      <p className="text-error text-xs mt-1">{errors.password}</p>
                     )}
                   </div>
 
                   {/* Confirmer mot de passe */}
                   <div>
-                    <label className="block text-gray-900 font-semibold mb-2 text-sm">
-                      Confirmer le mot de passe
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => updateFormData("confirmPassword", e.target.value)}
-                        disabled={loading}
-                        className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                          errors.confirmPassword
-                            ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                            : "border-gray-200 focus:border-primary focus:ring-primary/20"
-                        }`}
-                        placeholder="Confirmez votre mot de passe"
-                        autoComplete="new-password"
-                        required
-                      />
-                    </div>
+                    <input
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => updateFormData("confirmPassword", e.target.value)}
+                      disabled={loading}
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none transition disabled:bg-white ${
+                        errors.confirmPassword
+                          ? "border-error focus:border-error"
+                          : "border-border focus:border-primary"
+                      }`}
+                      placeholder="Confirmer"
+                      autoComplete="new-password"
+                    />
                     {errors.confirmPassword && (
-                      <p className="text-red-600 text-xs mt-1.5">{errors.confirmPassword}</p>
+                      <p className="text-error text-xs mt-1">{errors.confirmPassword}</p>
                     )}
                   </div>
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-semibold hover:bg-secondary hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none mt-6"
+                    className="w-full px-6 py-3 bg-success hover:bg-opacity-90 text-white rounded-lg transition font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed mt-6"
                   >
-                    <UserPlus className="w-5 h-5" />
-                    <span>{loading ? "Création en cours..." : "Créer mon compte professionnel"}</span>
+                    {loading ? "Création..." : "Créer mon compte"}
                   </button>
                 </form>
 
-                {/* Divider */}
-                <div className="relative my-8">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-gray-500">Déjà inscrit ?</span>
-                  </div>
-                </div>
-
-                {/* Login Link */}
-                <Link
-                  href="/auth/login"
-                  className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-gray-50 text-gray-900 border-2 border-gray-200 rounded-2xl font-semibold hover:bg-gray-100 hover:border-primary hover:text-primary transition-all duration-300"
-                >
-                  Se connecter
-                </Link>
+                <p className="text-center text-text-light text-sm mt-6">
+                  Vous avez un compte ?{" "}
+                  <Link href="/auth/login" className="text-primary hover:text-secondary transition font-semibold">
+                    Se connecter
+                  </Link>
+                </p>
               </div>
             </div>
           </div>
         </div>
       </main>
-      <Footer />
     </>
   );
 }
