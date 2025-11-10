@@ -1,5 +1,5 @@
+import Section from "@/components/marketing/Section";
 import { type Metadata } from "next";
-import { HelpCircle, MessageCircle, ChevronDown } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "FAQ — Olla",
@@ -47,62 +47,53 @@ const faqs: FAQItem[] = [
 export default function FAQPage() {
   return (
     <>
-      {/* Hero Section */}
-      <section className="py-8 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-8">
-
-            <h1 className="text-5xl lg:text-5xl font-bold text-gray-900 mb-2 leading-tight">
-              Questions <span className="text-primary">fréquentes</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-7xl mx-auto leading-relaxed">
-              Tout ce que vous devez savoir sur Olla pour démarrer en toute confiance
-            </p>
-          </div>
+      <Section>
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-text mb-4">
+            Questions fréquentes
+          </h1>
+          <p className="text-xl text-text-light max-w-2xl mx-auto">
+            Tout ce que vous devez savoir sur Olla.
+          </p>
         </div>
+      </Section>
 
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="space-y-4">
+      <Section>
+        <div className="max-w-3xl mx-auto">
+          <div className="space-y-6">
             {faqs.map((faq, index) => (
               <details
                 key={index}
-                className="group bg-white rounded-3xl border border-gray-100 hover:border-primary hover:shadow-xl transition-all duration-300"
+                className="group border border-border rounded-lg p-6 hover:bg-gray-50 transition cursor-pointer"
               >
-                <summary className="flex justify-between items-center gap-4 p-8 cursor-pointer list-none">
-                  <h3 className="text-lg font-bold text-gray-900 flex-1">
-                    {faq.question}
-                  </h3>
-                  <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform duration-300 flex-shrink-0" />
+                <summary className="flex justify-between items-center font-semibold text-text">
+                  {faq.question}
+                  <span className="text-success group-open:rotate-180 transition">
+                    ▼
+                  </span>
                 </summary>
-                <div className="px-8 pb-8 pt-0">
-                  <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
-                </div>
+                <p className="text-text-light mt-4">{faq.answer}</p>
               </details>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* Contact CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-primary to-secondary">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-7xl lg:text-5xl font-bold text-white mb-6">
-              Vous n'avez pas trouvé votre réponse ?
-            </h2>
-            <p className="text-xl text-blue-100 mb-10 leading-relaxed">
-              Notre équipe est là pour vous aider. N'hésitez pas à nous contacter, nous vous répondrons dans les plus brefs délais.
-            </p>
-            <a
-              href="/marketing/contact"
-              className="inline-flex items-center gap-3 px-10 py-5 bg-white text-primary rounded-2xl font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 text-lg"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span>Nous contacter</span>
-            </a>
-          </div>
+        {/* Contact CTA */}
+        <div className="mt-20 text-center bg-gray-50 rounded-2xl p-12">
+          <h3 className="text-2xl font-bold text-text mb-4">
+            Vous n'avez pas trouvé votre réponse ?
+          </h3>
+          <p className="text-text-light mb-6">
+            Notre équipe est là pour vous aider. N'hésitez pas à nous contacter.
+          </p>
+          <a
+            href="/marketing/contact"
+            className="inline-block px-8 py-3 bg-primary text-white rounded-lg hover:bg-secondary transition font-semibold"
+          >
+            Nous contacter
+          </a>
         </div>
-      </section>
+      </Section>
     </>
   );
 }
