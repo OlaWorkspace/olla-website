@@ -16,7 +16,18 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      {
+        url: "/logo-fond-bleu.png",
+        type: "image/png",
+      }
+    ],
+    apple: [
+      {
+        url: "/logo-fond-bleu.png",
+        type: "image/png",
+      }
+    ],
   },
 };
 
@@ -26,9 +37,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" className="scroll-smooth">
       <body className="bg-white text-text antialiased">
         <ConditionalLayout>{children}</ConditionalLayout>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if ('scrollRestoration' in history) {
+              history.scrollRestoration = 'manual';
+            }
+            window.scrollTo(0, 0);
+          `
+        }} />
       </body>
     </html>
   );
