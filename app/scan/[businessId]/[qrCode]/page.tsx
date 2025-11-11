@@ -10,7 +10,42 @@ export default function ScanFallbackPage() {
   const qrCode = params?.qrCode as string;
 
   const [platform, setPlatform] = useState<'ios' | 'android' | 'unknown'>('unknown');
-  const [appOpened, setAppOpened] = useState(false);
+  const [countdown, setCountdown] = useState(45);
+
+  // 🔒 SÉCURITÉ: Bloquer F12 et DevTools (utilisateurs basiques)
+  useEffect(() => {
+    const blockDevTools = (e: KeyboardEvent) => {
+      // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'u')
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    document.addEventListener('keydown', blockDevTools);
+    return () => document.removeEventListener('keydown', blockDevTools);
+  }, []);
+
+  // 🔒 SÉCURITÉ: Redirection automatique vers l'accueil après 45 secondes
+  useEffect(() => {
+    const countdownInterval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval);
+          // Redirection vers l'accueil
+          window.location.href = 'https://www.ollafidelite.com';
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdownInterval);
+  }, []);
 
   useEffect(() => {
     // Détecter la plateforme
@@ -25,10 +60,10 @@ export default function ScanFallbackPage() {
     const deepLink = `olla://scan/${businessId}/${qrCode}`;
     const universalLink = `https://ollafidelite.com/scan/${businessId}/${qrCode}`;
 
-    // Essayer d'ouvrir l'app
+    // Essayer d'ouvrir l'app (timeout de 1.5s)
     const timeout = setTimeout(() => {
       // Si après 1.5s on est toujours sur la page, l'app n'est probablement pas installée
-      setAppOpened(false);
+      // Rien à faire, la page reste affichée
     }, 1500);
 
     // Tenter l'ouverture
@@ -37,6 +72,10 @@ export default function ScanFallbackPage() {
     // Sauvegarder le lien pour après installation
     if (typeof window !== 'undefined') {
       localStorage.setItem('olla_pending_scan', universalLink);
+
+      // 🔒 SÉCURITÉ: Masquer l'URL dans la barre d'adresse
+      // L'URL devient juste "ollafidelite.com/scan" sans les IDs visibles
+      window.history.replaceState(null, '', '/scan');
     }
 
     // Cleanup
@@ -52,7 +91,11 @@ export default function ScanFallbackPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 flex items-center justify-center px-4">
+    <div
+      className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 flex items-center justify-center px-4"
+      onContextMenu={(e) => e.preventDefault()} // Désactive clic droit
+      style={{ userSelect: 'none' }} // Désactive sélection de texte
+    >
       <div className="max-w-md w-full">
         {/* Card principale */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
@@ -168,6 +211,13 @@ export default function ScanFallbackPage() {
           <div className="mt-8 p-4 bg-blue-50 rounded-xl">
             <p className="text-sm text-slate-600">
               <span className="font-semibold text-blue-600">✓</span> Une fois l'app installée, vos points seront automatiquement ajoutés à votre compte !
+            </p>
+          </div>
+
+          {/* Timer de redirection */}
+          <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <p className="text-xs text-slate-500">
+              Redirection automatique dans <span className="font-bold text-blue-600">{countdown}s</span>
             </p>
           </div>
         </div>
