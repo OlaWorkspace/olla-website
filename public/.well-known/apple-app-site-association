@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "98LQHU78NT.com.loyalty.olla",
+        "paths": [
+          "/scan/*",
+          "/business/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "98LQHU78NT.com.loyalty.olla"
+    ]
+  }
+}
