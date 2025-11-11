@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.loyalty.olla",
+      "sha256_cert_fingerprints": [
+        "F1:DA:F4:A8:0F:AB:79:73:89:C5:0A:6F:74:D0:15:4E:C6:41:5D:B5:1A:8A:25:F2:FC:EF:45:AA:DA:CD:F7:EA"
+      ]
+    }
+  }
+]
