@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ConditionalLayout from "@/components/common/ConditionalLayout";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "Olla — La fidélité sans carte",
@@ -54,7 +55,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className="scroll-smooth">
       <body className="bg-white text-text antialiased">
-        <ConditionalLayout>{children}</ConditionalLayout>
+        <AuthProvider>
+          <ConditionalLayout>{children}</ConditionalLayout>
+        </AuthProvider>
         <script dangerouslySetInnerHTML={{
           __html: `
             if ('scrollRestoration' in history) {
