@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Zap, TrendingUp, UserPlus, Mail, Lock, User } from "lucide-react";
+import { UserPlus, Mail, Lock, User, CheckCircle2, CreditCard, Building2, Gift } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { createClient } from "@/lib/supabase/clients/browser";
@@ -136,65 +136,118 @@ export default function SignupPage() {
       <Header />
       <main className="min-h-screen">
         {/* Container Principal */}
-        <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 lg:py-12">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8 lg:py-12">
 
           {/* Grid: 2 colonnes sur desktop, 1 sur mobile */}
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 items-start">
 
             {/* COLONNE GAUCHE: Bénéfices et contexte - Cachée sur mobile */}
-            <div className="hidden md:flex flex-col justify-center md:sticky md:top-8">
-              <div className="mb-8 lg:mb-12">
-                <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-3 lg:mb-4 leading-tight">
+            <div className="hidden md:flex flex-col justify-center md:sticky md:top-8 md:pr-8 lg:pr-12">
+              {/* En-tête avec titre allégé */}
+              <div className="mb-12 lg:mb-8">
+                <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4 lg:mb-2 leading-tight">
                   Fidélisez vos clients <span className="text-primary">sans effort</span>
                 </h1>
-                <p className="text-base lg:text-lg text-gray-600 leading-relaxed">
-                  Une seule solution. Programme de fidélité automatique, avis Google et suivi en temps réel.
+                <p className="text-base lg:text-lg text-gray-500 leading-relaxed">
+                  En 4 étapes simples
                 </p>
               </div>
 
-              {/* 3 Bénéfices Clés */}
-              <div className="space-y-4 lg:space-y-6">
-                <div className="flex gap-3 lg:gap-4">
+              {/* Processus d'inscription simplifié */}
+              <div className="space-y-6 lg:space-y-8">
+                {/* <div className="flex items-center gap-3 mb-6 lg:mb-8">
+                  <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent"></div>
+                  <h2 className="text-base lg:text-lg font-semibold text-gray-400 uppercase tracking-wider">
+                    En 4 étapes simples
+                  </h2>
+                  <div className="h-px flex-1 bg-gradient-to-l from-primary/20 to-transparent"></div>
+                </div> */}
+
+                {/* Étape 1 */}
+                <div className="flex gap-4 group hover:translate-x-1 transition-transform duration-200">
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 rounded-lg lg:rounded-xl flex items-center justify-center">
-                      <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <p className="text-xl lg:text-3xl font-bold text-gray-900 text-primary">
+                        1
+                      </p>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-base lg:text-lg mb-0.5 lg:mb-1">Installation express</h3>
-                    <p className="text-gray-600 text-sm lg:text-base">Un scan, un point. Simple, immédiat.</p>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-base lg:text-lg mb-2">
+                      Informations personnelles
+                    </h3>
+                    <p className="text-gray-500 text-sm lg:text-base leading-relaxed">
+                      Créez votre espace en quelques clics
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex gap-3 lg:gap-4">
+                {/* Étape 2 */}
+                <div className="flex gap-4 group hover:translate-x-1 transition-transform duration-200">
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 rounded-lg lg:rounded-xl flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <p className="text-xl lg:text-3xl font-bold text-gray-900 text-primary">
+                        2
+                      </p>                    
                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-base lg:text-lg mb-0.5 lg:mb-1">Automatisé</h3>
-                    <p className="text-gray-600 text-sm lg:text-base">Récompenses et avis gérés automatiquement.</p>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-base lg:text-lg mb-2">
+                      Formule d'abonnement
+                    </h3>
+                    <p className="text-gray-500 text-sm lg:text-base leading-relaxed">
+                      Choisissez le plan adapté à vos besoins
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex gap-3 lg:gap-4">
+                {/* Étape 3 */}
+                <div className="flex gap-4 group hover:translate-x-1 transition-transform duration-200">
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 rounded-lg lg:rounded-xl flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <p className="text-xl lg:text-3xl font-bold text-gray-900 text-primary">
+                        3
+                      </p>                    
                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-base lg:text-lg mb-0.5 lg:mb-1">Impact concret</h3>
-                    <p className="text-gray-600 text-sm lg:text-base">Plus de visites, plus d'habitués. Ça se voit dans les chiffres.</p>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-base lg:text-lg mb-2">
+                      Informations du commerce
+                    </h3>
+                    <p className="text-gray-500 text-sm lg:text-base leading-relaxed">
+                      Présentez votre établissement
+                    </p>
+                  </div>
+                </div>
+
+                {/* Étape 4 */}
+                <div className="flex gap-4 group hover:translate-x-1 transition-transform duration-200">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <p className="text-xl lg:text-3xl font-bold text-gray-900 text-primary">
+                        4
+                      </p>                    
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-base lg:text-lg mb-2">
+                      Programme de fidélité
+                    </h3>
+                    <p className="text-gray-500 text-sm lg:text-base leading-relaxed">
+                      Définissez vos récompenses
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Stat ou Trust Signal */}
-              <div className="mt-8 lg:mt-12 pt-6 lg:pt-8 border-t border-gray-200">
-                <p className="text-xl lg:text-2xl font-bold text-gray-900">Faites partie du réseau <span className="text-primary">Olla Fidelite</span> </p>
-                <p className="text-xs lg:text-sm text-gray-500 mt-2">Apparaissez sur la carte aux côtés des autres commerces et laissez les clients vous découvrir naturellement.</p>
+              {/* Stat ou Trust Signal - Visible sur desktop */}
+              <div className="hidden md:block mt-8 pt-6 lg:pt-8 border-t border-gray-200">
+                <p className="text-xl lg:text-3xl font-bold text-gray-900">
+                  Faites partie du réseau <span className="text-primary">Olla Fidelite</span>
+                </p>
+                <p className="text-sm lg:text-base text-gray-500 mt-2">
+                  Apparaissez sur la carte aux côtés des autres commerces et laissez les clients vous découvrir naturellement.
+                </p>
               </div>
             </div>
 
@@ -203,7 +256,7 @@ export default function SignupPage() {
               <div className="bg-white rounded-lg sm:rounded-2xl lg:rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-6 lg:p-8 xl:p-10">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-1.5 lg:mb-2">Créer mon compte</h2>
                 <p className="text-gray-600 text-xs sm:text-sm lg:text-base mb-4 sm:mb-6 lg:mb-8">
-                  Gratuit, sans engagement • 2 minutes
+                  En 3 minutes
                 </p>
 
                 {Object.keys(errors).some(key => errors[key as keyof FormErrors]) && (
@@ -376,6 +429,55 @@ export default function SignupPage() {
                 >
                   Se connecter
                 </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Processus d'inscription - Visible uniquement sur mobile */}
+          <div className="md:hidden mt-8 sm:mt-12">
+            <div className="space-y-5">
+              <h2 className="text-xl font-bold text-gray-900">
+                Créez votre compte en quelques minutes
+              </h2>
+
+              {/* Étape 1 */}
+              <div>
+                <h3 className="font-bold text-gray-900 text-base mb-1.5">
+                  <span className="text-primary">1.</span> Renseignez vos informations personnelles
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Saisissez votre identifiant, mot de passe, prénom et nom pour créer votre espace sécurisé.
+                </p>
+              </div>
+
+              {/* Étape 2 */}
+              <div>
+                <h3 className="font-bold text-gray-900 text-base mb-1.5">
+                  <span className="text-primary">2.</span> Choisissez votre formule d'abonnement
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Sélectionnez le plan qui correspond le mieux à vos besoins et à la taille de votre commerce.
+                </p>
+              </div>
+
+              {/* Étape 3 */}
+              <div>
+                <h3 className="font-bold text-gray-900 text-base mb-1.5">
+                  <span className="text-primary">3.</span> Complétez les informations de votre établissement
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Indiquez le nom du commerce, son adresse, son numéro de téléphone et son secteur d'activité.
+                </p>
+              </div>
+
+              {/* Étape 4 */}
+              <div>
+                <h3 className="font-bold text-gray-900 text-base mb-1.5">
+                  <span className="text-primary">4.</span> Configurez votre programme de fidélité
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Définissez le nombre de points nécessaires, les récompenses offertes et les éventuels paliers pour vos clients.
+                </p>
               </div>
             </div>
           </div>
