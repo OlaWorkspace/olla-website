@@ -61,7 +61,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-primary transition-colors">
+                <Link href="/info/about" className="hover:text-primary transition-colors">
                   À propos
                 </Link>
               </li>
@@ -139,7 +139,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-primary transition-colors block py-1">
+                  <Link href="/info/about" className="hover:text-primary transition-colors block py-1">
                     À propos
                   </Link>
                 </li>

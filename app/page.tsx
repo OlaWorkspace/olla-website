@@ -61,7 +61,7 @@ export default function Home() {
                 Rejoignez les centaines de commerces qui utilisent Olla pour booster leur fidélisation et augmenter leurs ventes.
               </p>
               <Link
-                href="/become-pro"
+                href="/auth/signup"
                 className="inline-flex items-center gap-1.5 sm:gap-2 lg:gap-3 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 bg-white text-primary rounded-lg sm:rounded-xl lg:rounded-2xl font-semibold text-xs sm:text-sm lg:text-base hover:shadow-2xl hover:scale-105 transition-all duration-300"
               >
                 <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
