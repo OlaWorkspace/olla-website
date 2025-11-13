@@ -23,6 +23,8 @@ const CATEGORIES = [
 interface FormData {
   businessName: string;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
   phone: string;
   website: string;
   category: string;
@@ -43,6 +45,8 @@ export default function BusinessCreation() {
   const [formData, setFormData] = useState<FormData>({
     businessName: '',
     address: '',
+    latitude: null,
+    longitude: null,
     phone: '',
     website: '',
     category: '',
@@ -117,6 +121,8 @@ export default function BusinessCreation() {
           businessData: {
             businessName: formData.businessName,
             address: formData.address,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
             phone: formData.phone,
             website: formData.website || null,
             category: formData.category,
@@ -233,8 +239,8 @@ export default function BusinessCreation() {
             </label>
             <AddressAutocomplete
               value={formData.address}
-              onSelectAddress={(address) => {
-                setFormData(prev => ({ ...prev, address }));
+              onSelectAddress={(address, latitude, longitude) => {
+                setFormData(prev => ({ ...prev, address, latitude, longitude }));
               }}
               placeholder="Ex: 123 Rue de la Paix, 75000 Paris"
               disabled={loading}
