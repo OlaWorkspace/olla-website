@@ -1,60 +1,73 @@
 import Link from "next/link";
-import { Check, Zap, CreditCard, HelpCircle, MessageCircle, Star, Sparkles } from "lucide-react";
+import { Check, Zap, CreditCard, HelpCircle, MessageCircle, Star, Sparkles, Tag } from "lucide-react";
 import type { Plan } from '@/types';
 
-// Plans en dur basés sur la base de données
-const HARDCODED_PLANS: Plan[] = [
-  {
-    id: '779a7603-9750-4a86-90b7-702125fcafd8',
-    name: 'Gratuit',
-    slug: 'free',
-    description: 'Pour débuter avec les cartes de fidélité',
-    price_monthly: 0,
-    features: [
-      'Carte de fidélité',
-      'Apparaître sur la map de l\'app'
-    ],
-    max_loyalty_programs: 1,
-    display_order: 1
-  },
-  {
-    id: 'b44f0e35-de72-42ba-ac4c-9bf77b20aeac',
-    name: 'Premium',
-    slug: 'premium',
-    description: 'Pour les commerces qui veulent aller plus loin',
-    price_monthly: 14.99,
-    features: [
-      'Carte de fidélité',
-      'Apparaître sur la map de l\'app',
-      'Lien avec avis google',
-      'Personnalisation programme de fidélité à paliers',
-      'Statistiques simples'
-    ],
-    max_loyalty_programs: null,
-    display_order: 2
-  },
-  {
-    id: '81708212-b75a-4f9c-9420-b9a38238c01e',
-    name: 'Pro',
-    slug: 'pro',
-    description: 'Pour les professionnels exigeants (bientôt disponible)',
-    price_monthly: 39.96,
-    features: [
-      'Carte de fidélité',
-      'Apparaître sur la map de l\'app',
-      'Lien avec avis google',
-      'Personnalisation programme de fidélité à paliers',
-      'Statistiques avancées',
-      'Support prioritaire',
-      'API access'
-    ],
-    max_loyalty_programs: null,
-    display_order: 3
-  }
-];
+// Helper function to check if promotion is active
+function isPromotionActive(plan: Plan): boolean {
+  if (!plan.promotion_enabled) return false;
 
-export default function PricingPage() {
-  const plans = HARDCODED_PLANS;
+  const now = new Date();
+
+  // Check start date
+  if (plan.promotion_start_date) {
+    const startDate = new Date(plan.promotion_start_date);
+    if (now < startDate) return false;
+  }
+
+  // Check end date
+  if (plan.promotion_end_date) {
+    const endDate = new Date(plan.promotion_end_date);
+    if (now > endDate) return false;
+  }
+
+  // Check quantity limits
+  if (plan.promotion_quantity_limit !== null && plan.promotion_quantity_limit !== undefined) {
+    const used = plan.promotion_quantity_used || 0;
+    if (used >= plan.promotion_quantity_limit) return false;
+  }
+
+  return true;
+}
+
+// Fonction pour récupérer les plans depuis Supabase (Server Component)
+async function getPlans(): Promise<Plan[]> {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-get-available-plans`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Pas de cache pour avoir les dernières données
+        cache: 'no-store'
+      }
+    );
+
+    if (!response.ok) {
+      console.error('Failed to fetch plans:', response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.data) {
+      // Convertir price_monthly de centimes en euros
+      return data.data.map((plan: any) => ({
+        ...plan,
+        price_monthly: plan.price_monthly / 100
+      }));
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error fetching plans:', error);
+    return [];
+  }
+}
+
+export default async function PricingPage() {
+  const plans = await getPlans();
 
   return (
     <>
@@ -77,20 +90,33 @@ export default function PricingPage() {
             {plans.map((plan) => {
               const isProPlan = plan.slug === 'pro';
               const isPremium = plan.slug === 'premium';
+              const hasActivePromotion = isPromotionActive(plan);
 
               return (
                 <div
                   key={plan.id}
-                  className={`relative bg-white rounded-lg sm:rounded-2xl lg:rounded-3xl border transition-all duration-300 ${
-                    isProPlan
+                  className={`relative bg-white rounded-lg sm:rounded-2xl lg:rounded-3xl border-2 transition-all duration-300 ${
+                    hasActivePromotion
+                      ? 'border-orange-400 shadow-lg shadow-orange-100 sm:scale-105'
+                      : isProPlan
                       ? 'border-gray-200 opacity-60'
                       : isPremium
                       ? 'border-primary shadow-xl sm:scale-105'
                       : 'border-gray-100 hover:border-primary hover:shadow-xl'
                   }`}
                 >
-                  {/* Badge "Populaire" for Premium */}
-                  {isPremium && (
+                  {/* Badge "Promotion" for active promotions */}
+                  {hasActivePromotion && plan.promotion_label && (
+                    <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2">
+                      <span className="inline-flex items-center gap-1 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] sm:text-xs font-semibold rounded-full shadow-lg">
+                        <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                        {plan.promotion_label}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Badge "Populaire" for Premium (only if no promotion) */}
+                  {!hasActivePromotion && isPremium && (
                     <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2">
                       <span className="inline-flex items-center gap-1 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-primary to-secondary text-white text-[10px] sm:text-xs font-semibold rounded-full shadow-lg">
                         <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -99,8 +125,8 @@ export default function PricingPage() {
                     </div>
                   )}
 
-                  {/* Badge "Soon" for Pro plan */}
-                  {isProPlan && (
+                  {/* Badge "Soon" for Pro plan (only if no promotion) */}
+                  {!hasActivePromotion && isProPlan && (
                     <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2">
                       <span className="inline-flex items-center gap-1 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-semibold rounded-full">
                         <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -110,6 +136,57 @@ export default function PricingPage() {
                   )}
 
                   <div className="p-4 sm:p-6 lg:p-8">
+                    {/* Promotion Banner (inside card, at top) */}
+                    {hasActivePromotion && (
+                      <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-[10px] sm:text-xs font-bold text-orange-700">
+                              {plan.promotion_label || 'Offre spéciale'}
+                            </p>
+                            {plan.promotion_months_free && plan.promotion_months_free > 0 && (
+                              <p className="text-[9px] sm:text-[10px] text-orange-600">
+                                {plan.promotion_months_free} {plan.promotion_months_free === 1 ? 'mois offert' : 'mois offerts'}
+                              </p>
+                            )}
+                          </div>
+                          {plan.promotion_end_date && (
+                            <div className="text-right">
+                              <p className="text-[8px] sm:text-[9px] text-orange-600 font-medium">
+                                Expire le
+                              </p>
+                              <p className="text-[9px] sm:text-[10px] text-orange-700 font-semibold">
+                                {new Date(plan.promotion_end_date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        {plan.promotion_quantity_limit && (
+                          <div className="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-orange-200">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[9px] sm:text-[10px] text-orange-600 font-medium">
+                                Places restantes
+                              </p>
+                              <div className="flex items-center gap-1">
+                                <div className="h-1 sm:h-1.5 w-12 sm:w-16 bg-orange-200 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-orange-500 rounded-full transition-all"
+                                    style={{
+                                      width: `${Math.max(0, Math.min(100, ((plan.promotion_quantity_limit - (plan.promotion_quantity_used || 0)) / plan.promotion_quantity_limit) * 100))}%`
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-[9px] sm:text-[10px] font-bold text-orange-700">
+                                  {Math.max(0, plan.promotion_quantity_limit - (plan.promotion_quantity_used || 0))}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Plan Header */}
                     <div className="mb-3 sm:mb-4 lg:mb-6">
                       <h3 className="text-base sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1 sm:mb-1.5 lg:mb-2">
@@ -123,11 +200,11 @@ export default function PricingPage() {
                     {/* Pricing */}
                     <div className="mb-4 sm:mb-6 lg:mb-8 pb-4 sm:pb-6 lg:pb-8 border-b border-gray-100">
                       <div className="flex items-baseline gap-1 sm:gap-1.5 lg:gap-2">
-                        <span className="text-2xl sm:text-3xl lg:text-5xl font-bold text-gray-900">
+                        <span className={`text-2xl sm:text-3xl lg:text-5xl font-bold ${hasActivePromotion ? 'text-orange-600' : 'text-gray-900'}`}>
                           {plan.price_monthly === 0 ? 'Gratuit' : `${plan.price_monthly}€`}
                         </span>
                         {plan.price_monthly > 0 && (
-                          <span className="text-gray-600 text-xs sm:text-sm lg:text-lg">/mois</span>
+                          <span className={`text-xs sm:text-sm lg:text-lg ${hasActivePromotion ? 'text-orange-500' : 'text-gray-600'}`}>/mois</span>
                         )}
                       </div>
                     </div>

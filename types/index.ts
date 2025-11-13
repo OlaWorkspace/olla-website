@@ -18,6 +18,7 @@ export interface Plan {
   features: string[];
   max_loyalty_programs: number | null;
   display_order: number;
+  is_active?: boolean;
   promotion_enabled?: boolean;
   promotion_label?: string | null;
   promotion_months_free?: number;
