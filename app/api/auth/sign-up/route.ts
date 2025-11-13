@@ -49,9 +49,18 @@ export async function POST(request: NextRequest) {
   );
 
   try {
+    // Passer les infos utilisateur dans les métadonnées
+    // Le trigger handle_new_user les utilisera automatiquement
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          pro: true  // 👈 Important : marquer comme professionnel
+        }
+      }
     });
 
     if (error) {
@@ -59,54 +68,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (data?.user) {
-      // Vérifier si le profil existe déjà
-      const { data: existingUser, error: checkError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', data.user.id)
-        .single();
-
-      let userProfile;
-
-      if (!existingUser) {
-        // L'utilisateur n'existe pas, le créer
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            auth_id: data.user.id,
-            user_firstname: firstName.trim(),
-            user_lastname: lastName.trim(),
-            user_email: email,
-            pro: true  // 👈 Passer directement en pro
-          });
-
-        if (profileError) {
-          console.error("Erreur création profil:", profileError);
-          return NextResponse.json(
-            { error: "Erreur lors de la création du profil" },
-            { status: 500 }
-          );
-        }
-      } else if (existingUser) {
-        // L'utilisateur existe déjà, le mettre à jour avec les nouvelles données
-        const { error: updateError } = await supabase
-          .from('users')
-          .update({
-            user_firstname: firstName.trim(),
-            user_lastname: lastName.trim(),
-            pro: true
-          })
-          .eq('auth_id', data.user.id);
-
-        if (updateError) {
-          console.error("Erreur mise à jour profil:", updateError);
-          return NextResponse.json(
-            { error: "Erreur lors de la mise à jour du profil" },
-            { status: 500 }
-          );
-        }
-      }
-
       return NextResponse.json(
         {
           success: true,
