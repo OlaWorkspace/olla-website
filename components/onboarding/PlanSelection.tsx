@@ -5,17 +5,20 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Zap, ArrowRight } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import type { Plan } from '@/types';
 
 export default function PlanSelection() {
   const router = useRouter();
+  const { user, userProfile, loading: authLoading } = useAuth();
   const { setSelectedPlan } = useOnboarding();
   const { callFunction } = useEdgeFunction();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -40,13 +43,51 @@ export default function PlanSelection() {
     fetchPlans();
   }, []);
 
-  const handleSelectPlan = (plan: Plan) => {
+  const handleSelectPlan = async (plan: Plan) => {
+    // Attendre que l'authentification soit chargée
+    if (authLoading) {
+      setError('Chargement en cours, veuillez patienter...');
+      return;
+    }
+
+    if (!user || !userProfile) {
+      setError('Veuillez vous connecter pour continuer');
+      return;
+    }
+
     setSelectedSlug(plan.slug);
     setSelectedPlan(plan);
-    // Redirection après une courte animation
-    setTimeout(() => {
-      router.push('/onboarding/business');
-    }, 300);
+    setSaving(true);
+
+    try {
+      // Save progress to database
+      const { error: saveError } = await callFunction('web-save-onboarding-progress', {
+        userId: userProfile.id,
+        authId: user.id,
+        step: 'plan_selected',
+        data: {
+          selectedPlan: plan
+        }
+      });
+
+      if (saveError) {
+        console.error('Error saving plan selection:', saveError);
+        // Continue anyway - data is in context
+      }
+
+      // Redirection après sauvegarde
+      setTimeout(() => {
+        router.push('/onboarding/business');
+      }, 300);
+    } catch (err) {
+      console.error('Error in handleSelectPlan:', err);
+      // Continue anyway - data is in context
+      setTimeout(() => {
+        router.push('/onboarding/business');
+      }, 300);
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Helper function to format price from cents to euros

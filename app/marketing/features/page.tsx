@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
-import { Zap, Smartphone, Shield, Gift, Check, TrendingUp, Users, Award, BarChart3, Lock, QrCode, Star, Bell, Clock, Store, MapPinHouse } from "lucide-react";
+import { Zap, Smartphone, Shield, Gift, Users, BarChart3, QrCode, Star, Bell, Clock, Store, MapPinHouse } from "lucide-react";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Fonctionnalités — Olla",
@@ -145,55 +146,70 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Detailed Feature 1 */}
+      {/* Comment fonctionne la fidélité avec Olla */}
       <section className="hidden sm:block py-4 sm:py-8 lg:py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
+          <h2 className="text-lg sm:text-2xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4">
+            Comment fonctionne la fidélité avec Olla ?
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 items-center">
 
-            <div>
+            <div className="sm:col-span-2">
 
-              <h2 className="text-lg sm:text-2xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-6">
-                Construisez une fidélité qui vous ressemble
-              </h2>
-              <p className="text-[11px] sm:text-base lg:text-xl text-gray-600 mb-3 sm:mb-5 lg:mb-8 leading-relaxed">
-                Définissez vos règles en quelques clics. Points, paliers, récompenses : tout est modulable pour s'adapter parfaitement à votre activité et à votre clientèle.
+              <p className="text-[11px] sm:text-base lg:text-xl text-gray-600 mb-4 sm:mb-6 lg:mb-8 leading-relaxed">
+                Une expérience simple, fluide et 100 % automatique.
               </p>
-              <div className="space-y-1.5 sm:space-y-2.5 lg:space-y-4">
-                <div className="flex items-start gap-1.5 sm:gap-2.5 lg:gap-3">
-                  <div className="w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white stroke-[3]" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-[11px] sm:text-sm lg:text-base mb-0.5">Gains sur mesure</h3>
-                    <p className="text-gray-600 text-[10px] sm:text-xs lg:text-base leading-tight sm:leading-normal">Fixez le nombre de points nécessaires pour chaque récompenses</p>
-                  </div>
+
+              <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+                {/* Étape 1 */}
+                <div>
+                  <h3 className="font-bold text-gray-900 text-[11px] sm:text-sm lg:text-lg mb-1 sm:mb-1.5 lg:mb-2">
+                    <span className="text-primary">1.</span> Le client découvre votre affiche
+                  </h3>
+                  <p className="text-gray-600 text-[10px] sm:text-xs lg:text-base leading-tight sm:leading-relaxed">
+                    Une petite affiche NFC / QR code est placée à votre comptoir. Elle contient tout ce qu'il faut pour identifier votre commerce.
+                  </p>
                 </div>
-                <div className="flex items-start gap-1.5 sm:gap-2.5 lg:gap-3">
-                  <div className="w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white stroke-[3]" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-[11px] sm:text-sm lg:text-base mb-0.5">Paliers multiples</h3>
-                    <p className="text-gray-600 text-[10px] sm:text-xs lg:text-base leading-tight sm:leading-normal">Proposez plusieurs niveaux d'avantages pour engager tous vos clients.</p>
-                  </div>
+
+                {/* Étape 2 */}
+                <div>
+                  <h3 className="font-bold text-gray-900 text-[11px] sm:text-sm lg:text-lg mb-1 sm:mb-1.5 lg:mb-2">
+                    <span className="text-primary">2.</span> Il scanne ou approche son smartphone
+                  </h3>
+                  <p className="text-gray-600 text-[10px] sm:text-xs lg:text-base leading-tight sm:leading-relaxed">
+                    En un geste, le client scanne le QR code ou approche son téléphone du sticker NFC. L'application reconnaît instantanément votre commerce.
+                  </p>
                 </div>
-                <div className="flex items-start gap-1.5 sm:gap-2.5 lg:gap-3">
-                  <div className="w-3.5 h-3.5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white stroke-[3]" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-[11px] sm:text-sm lg:text-base mb-0.5">Récompenses à votre image</h3>
-                    <p className="text-gray-600 text-[10px] sm:text-xs lg:text-base leading-tight sm:leading-normal">Choisissez les avantages que vous souhaitez offrir.</p>
-                  </div>
+
+                {/* Étape 3 */}
+                <div>
+                  <h3 className="font-bold text-gray-900 text-[11px] sm:text-sm lg:text-lg mb-1 sm:mb-1.5 lg:mb-2">
+                    <span className="text-primary">3.</span> Le point est ajouté automatiquement
+                  </h3>
+                  <p className="text-gray-600 text-[10px] sm:text-xs lg:text-base leading-tight sm:leading-relaxed">
+                    Olla crédite directement 1 point sur le programme de fidélité du client. Aucun bouton, aucun terminal, aucune action à faire de votre côté.
+                  </p>
+                </div>
+
+                {/* Étape 4 */}
+                <div>
+                  <h3 className="font-bold text-gray-900 text-[11px] sm:text-sm lg:text-lg mb-1 sm:mb-1.5 lg:mb-2">
+                    <span className="text-primary">4.</span> La récompense se déclenche toute seule
+                  </h3>
+                  <p className="text-gray-600 text-[10px] sm:text-xs lg:text-base leading-tight sm:leading-relaxed">
+                    Quand la jauge de fidélité est pleine, l'application génère un QR code que le commerçant scanne simplement pour valider la récompense. Le compteur se remet à zéro automatiquement.
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl p-8 lg:p-12 items-center justify-center h-[300px] lg:h-[400px]">
-              <div className="text-center">
-                <Gift className="w-16 h-16 lg:w-24 lg:h-24 text-primary mx-auto mb-3 lg:mb-4" />
-                <p className="text-gray-600 font-medium text-sm lg:text-base">Interface de gestion des récompenses</p>
-              </div>
+            <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] rounded-2xl lg:rounded-3xl overflow-hidden">
+              <Image
+                src="/affiche.png"
+                alt="Affiche Olla Fidelite avec QR code et NFC"
+                fill
+                className="object-contain"
+              />
             </div>
           </div>
         </div>
@@ -210,11 +226,11 @@ export default function FeaturesPage() {
             Rejoignez les commerces qui utilisent Olla pour fidéliser leurs clients et augmenter leurs ventes.
           </p>
           <a
-            href="/become-pro"
+            href="/auth/login"
             className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 bg-white text-primary rounded-xl sm:rounded-2xl font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 text-sm sm:text-base lg:text-lg"
           >
             <Store className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span>Devenir professionnel</span>
+            <span>Espace pro</span>
           </a>
         </div>
       </section>

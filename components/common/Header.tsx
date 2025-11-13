@@ -102,7 +102,7 @@ export default function Header() {
               href="/auth/login"
               className="block px-6 py-2 bg-primary text-white rounded-lg text-center hover:bg-secondary transition font-semibold"
             >
-              Espaces pro
+              Espace pro
             </Link>
           </div>
         </div>

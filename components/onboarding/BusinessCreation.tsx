@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, AlertCircle, Lightbulb } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
-import { useAuth } from '@/lib/supabase/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import AddressAutocomplete from './AddressAutocomplete';
 
@@ -38,8 +38,8 @@ interface Toast {
 
 export default function BusinessCreation() {
   const router = useRouter();
-  const { user, userProfile } = useAuth();
-  const { selectedPlan } = useOnboarding();
+  const { user, userProfile, loading: authLoading } = useAuth();
+  const { selectedPlan, setBusinessData } = useOnboarding();
   const { callFunction } = useEdgeFunction();
 
   const [formData, setFormData] = useState<FormData>({
@@ -72,6 +72,15 @@ export default function BusinessCreation() {
     e.preventDefault();
     setLoading(true);
 
+    // Debug: Log authentication state
+    console.log('🔍 BusinessCreation - Auth state:', {
+      authLoading,
+      hasUser: !!user,
+      hasUserProfile: !!userProfile,
+      userId: userProfile?.id,
+      authId: user?.id
+    });
+
     try {
       // Validation
       if (!formData.businessName.trim()) {
@@ -98,6 +107,13 @@ export default function BusinessCreation() {
         return;
       }
 
+      // Attendre que l'authentification soit chargée
+      if (authLoading) {
+        showToast('error', 'Chargement en cours, veuillez patienter...');
+        setLoading(false);
+        return;
+      }
+
       if (!user || !userProfile) {
         showToast('error', 'Utilisateur non authentifié');
         setLoading(false);
@@ -111,49 +127,30 @@ export default function BusinessCreation() {
         return;
       }
 
-      // Tentative d'appel à l'Edge Function avec le plan sélectionné
-      const { data, error } = await callFunction(
-        'web-complete-professional-onboarding',
-        {
-          userId: userProfile.id,
-          authId: user.id,
-          planSlug: selectedPlan.slug,
-          businessData: {
-            businessName: formData.businessName,
-            address: formData.address,
-            latitude: formData.latitude,
-            longitude: formData.longitude,
-            phone: formData.phone,
-            website: formData.website || null,
-            category: formData.category,
-            openingHours: formData.openingHours
-              ? (() => {
-                  try {
-                    return JSON.parse(formData.openingHours);
-                  } catch {
-                    return null;
-                  }
-                })()
-              : null
-          }
+      // Sauvegarder les données du commerce dans le contexte
+      setBusinessData(formData);
+
+      // Save progress to database
+      const { error: saveError } = await callFunction('web-save-onboarding-progress', {
+        userId: userProfile.id,
+        authId: user.id,
+        step: 'business_info',
+        data: {
+          businessData: formData,
+          selectedPlan: selectedPlan // Keep plan data in case they return
         }
-      );
+      });
 
-      if (error) {
-        showToast('error', `Erreur: ${error}`);
-        setLoading(false);
-        return;
+      if (saveError) {
+        console.error('Error saving business data:', saveError);
+        // Continue anyway - data is in context
       }
 
-      if (data && data.businessId) {
-        showToast('success', 'Commerce créé avec succès! Redirection...');
-        setTimeout(() => {
-          router.push('/pro');
-        }, 2000);
-      } else {
-        showToast('error', 'Une erreur est survenue');
-        setLoading(false);
-      }
+      showToast('success', 'Informations enregistrées! Redirection...');
+      setTimeout(() => {
+        router.push('/onboarding/loyalty');
+      }, 1500);
+
     } catch (err) {
       showToast('error', err instanceof Error ? err.message : 'Erreur inconnue');
       setLoading(false);
@@ -183,7 +180,7 @@ export default function BusinessCreation() {
       {/* Progress Bar */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-xs font-semibold text-text">Étape 3/3</h2>
+          <h2 className="text-xs font-semibold text-text">Étape 3/5</h2>
           <span className="text-xs text-text-light">{filledFields}/4</span>
         </div>
         <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
@@ -329,13 +326,18 @@ export default function BusinessCreation() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || !formData.businessName || !formData.address || !formData.phone || !formData.category}
+            disabled={loading || authLoading || !formData.businessName || !formData.address || !formData.phone || !formData.category}
             className="w-full px-6 py-2.5 bg-success hover:bg-opacity-90 disabled:bg-gray-300 text-white text-sm rounded-lg transition font-semibold disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
           >
-            {loading ? (
+            {authLoading ? (
               <>
                 <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Création...
+                Chargement...
+              </>
+            ) : loading ? (
+              <>
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Enregistrement...
               </>
             ) : progressPercent === 100 ? (
               <>
