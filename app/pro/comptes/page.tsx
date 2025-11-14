@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/clients/browser';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
+import { supabase } from '@/lib/supabase/clients/browser';
 
 interface ComptesData {
   user: {
@@ -27,6 +29,9 @@ interface ComptesData {
 }
 
 export default function ComptesPage() {
+  const { user, userProfile } = useAuth();
+  const { callFunction } = useEdgeFunction();
+
   const [data, setData] = useState<ComptesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,67 +50,29 @@ export default function ComptesPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!user || !userProfile) {
+        setError('Utilisateur non authentifié');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const supabase = createClient();
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
+        setLoading(true);
+        setError(null);
 
-        if (!authUser) {
-          setError('User not authenticated');
-          return;
-        }
-
-        // Récupérer l'utilisateur depuis la base de données pour obtenir le userId
-        const { data: dbUser, error: userError } = await supabase
-          .from('users')
-          .select('id')
-          .eq('auth_id', authUser.id)
-          .single();
-
-        if (userError || !dbUser) {
-          setError('Failed to fetch user data');
-          return;
-        }
-
-        // Récupérer le token de session
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!session?.access_token) {
-          setError('No access token available');
-          return;
-        }
-
-        // Récupérer les données du dashboard (qui contient le profil)
-        console.log('Fetching comptes data for user:', dbUser.id);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-get-pro-dashboard`,
+        const { data: dashboardData, error: dashboardError } = await callFunction(
+          'web-get-pro-dashboard',
           {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({
-              userId: dbUser.id,
-              authId: authUser.id,
-            }),
+            userId: userProfile.id,
+            authId: user.id,
           }
         );
 
-        console.log('Comptes response status:', response.status);
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('Comptes error response:', errorData);
-          throw new Error(errorData.error || `Failed to fetch data (${response.status})`);
+        if (dashboardError) {
+          throw new Error(dashboardError);
         }
 
-        const result = await response.json();
-        if (result.success) {
-          const dashboardData = result.data;
+        if (dashboardData) {
           setData(dashboardData);
           setFormData({
             firstName: dashboardData.user.firstName,
@@ -113,17 +80,18 @@ export default function ComptesPage() {
             email: dashboardData.user.email,
           });
         } else {
-          setError(result.error || 'Failed to fetch data');
+          setError('Aucune donnée retournée');
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.error('❌ Error fetching comptes data:', err);
+        setError(err instanceof Error ? err.message : 'Erreur inconnue');
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [user, userProfile, callFunction]);
 
   if (loading) {
     return (
@@ -179,7 +147,6 @@ export default function ComptesPage() {
     }
 
     try {
-      const supabase = createClient();
       const { error } = await supabase.auth.updateUser({
         password: passwordData.newPassword,
       });

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
-import { createClient } from "@/lib/supabase/clients/browser";
+import { supabase } from "@/lib/supabase/clients/browser";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -19,7 +19,6 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     // Vérifier si l'utilisateur a un token de réinitialisation valide
     const checkSession = async () => {
-      const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
@@ -55,7 +54,6 @@ export default function ResetPasswordPage() {
         return;
       }
 
-      const supabase = createClient();
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });

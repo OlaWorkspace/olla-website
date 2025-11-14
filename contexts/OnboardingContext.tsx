@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClient } from '@/lib/supabase/clients/browser';
+import { supabase } from '@/lib/supabase/clients/browser';
 import type { Plan } from '@/types';
 
 interface LoyaltyProgram {
@@ -58,7 +58,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       }
 
       try {
-        const supabase = createClient();
         const { data: userData, error } = await supabase
           .from('users')
           .select('onboarding_status, onboarding_data')

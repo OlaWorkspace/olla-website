@@ -7,7 +7,7 @@ import { ArrowLeft, CheckCircle2, AlertCircle, Package, Truck, Smartphone, Credi
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
-import { createClient } from '@/lib/supabase/clients/browser';
+import { supabase } from '@/lib/supabase/clients/browser';
 
 interface Toast {
   type: 'success' | 'error';
@@ -49,7 +49,6 @@ export default function WelcomeKit() {
       console.log('🎯 WelcomeKit - Starting onboarding completion...');
 
       // Check if business already exists first
-      const supabase = createClient();
       const { count } = await supabase
         .from('professionals')
         .select('id', { count: 'exact', head: true })

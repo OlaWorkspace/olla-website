@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/clients/browser";
+import { supabase } from "@/lib/supabase/clients/browser";
 import { Users, CreditCard, Building } from "lucide-react";
 
 interface Stats {
@@ -21,8 +21,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const supabase = createClient();
-
         const [usersResult, subscriptionsResult, businessesResult] =
           await Promise.all([
             supabase.from("users").select("id", { count: "exact", head: true }),
