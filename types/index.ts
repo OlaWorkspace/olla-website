@@ -6,6 +6,7 @@ export interface User {
   user_lastname: string;
   user_email: string;
   pro: boolean;
+  admin: boolean;
   auth_id: string | null;
 }
 

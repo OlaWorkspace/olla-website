@@ -58,7 +58,7 @@ export default function AdminLayout({
         <div className="p-6">
           <h1 className="text-2xl font-bold text-slate-900">Admin Panel</h1>
           <p className="text-sm text-slate-500 mt-1">
-            {userProfile?.first_name} {userProfile?.last_name}
+            {userProfile?.user_firstname} {userProfile?.user_lastname}
           </p>
         </div>
 
