@@ -7,7 +7,7 @@ import { ArrowLeft, CheckCircle2, AlertCircle, Gift, Lightbulb, Info } from 'luc
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
-import { createClient } from '@/lib/supabase/clients/browser';
+import { supabase } from '@/lib/supabase/clients/browser';
 
 interface LoyaltyProgram {
   id: string;
@@ -89,8 +89,6 @@ export default function LoyaltySetup() {
 
       // Sauvegarder dans le contexte
       setLoyaltyPrograms(programs);
-
-      const supabase = createClient();
 
       // Vérifier si le business existe déjà
       const { data: professional } = await supabase

@@ -4,7 +4,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BarChart3, Users, Gift, Settings, TrendingUp } from 'lucide-react';
-import { createClient } from '@/lib/supabase/clients/browser';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase/clients/browser';
 
 interface Business {
   id: string;
@@ -28,8 +29,12 @@ interface Dashboard {
   userFirstname: string;
 }
 
+/**
+ * Dashboard d'accueil pour les professionnels
+ * Utilise useAuth() pour récupérer les données utilisateur et l'instance singleton supabase
+ */
 export default function WelcomeDashboard() {
-  const supabase = createClient();
+  const { user, userProfile } = useAuth();
   const [dashboard, setDashboard] = useState<Dashboard>({
     business: null,
     subscription: null,
@@ -39,17 +44,12 @@ export default function WelcomeDashboard() {
 
   useEffect(() => {
     const fetchDashboard = async () => {
+      if (!user || !userProfile) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        // Récupération du profil utilisateur et du business
-        const { data: userProfile } = await supabase
-          .from('users')
-          .select('id, user_firstname')
-          .eq('auth_id', user.id)
-          .single();
-
         // Récupération du business via professionals
         const { data: professional } = await supabase
           .from('professionals')
@@ -60,41 +60,37 @@ export default function WelcomeDashboard() {
               business_name
             )
           `)
-          .eq('user_id', userProfile?.id)
+          .eq('user_id', userProfile.id)
           .single();
 
-        // Récupération de l'abonnement actif de l'utilisateur (user_subscriptions)
-        let subscription = null;
-        if (userProfile?.id) {
-          const { data: sub } = await supabase
-            .from('user_subscriptions')
-            .select(`
-              *,
-              subscription_plans (
-                name,
-                slug
-              )
-            `)
-            .eq('user_id', userProfile.id)
-            .eq('status', 'active')
-            .single();
-          subscription = sub;
-        }
+        // Récupération de l'abonnement actif de l'utilisateur
+        const { data: sub } = await supabase
+          .from('user_subscriptions')
+          .select(`
+            *,
+            subscription_plans (
+              name,
+              slug
+            )
+          `)
+          .eq('user_id', userProfile.id)
+          .eq('status', 'active')
+          .single();
 
         setDashboard({
           business: (Array.isArray(professional?.businesses) ? professional.businesses[0] : professional?.businesses) || null,
-          subscription: subscription,
-          userFirstname: userProfile?.user_firstname || ''
+          subscription: sub,
+          userFirstname: userProfile.user_firstname || (userProfile as any).first_name || ''
         });
       } catch (error) {
-        console.error('Error fetching dashboard:', error);
+        console.error('❌ Error fetching dashboard:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboard();
-  }, []);
+  }, [user, userProfile]);
 
   if (loading) {
     return (

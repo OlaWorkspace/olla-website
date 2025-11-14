@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, LogIn, UserPlus, Mail, Lock } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
-import { createClient } from "@/lib/supabase/clients/browser";
+import { supabase } from "@/lib/supabase/clients/browser";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,22 +25,26 @@ export default function LoginPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
 
-        if (user) {
+        if (session?.user) {
           // Utilisateur connecté, vérifier son rôle
           const { data: userData } = await supabase
             .from('users')
-            .select('pro, admin')
-            .eq('auth_id', user.id)
+            .select('pro, admin, onboarding_status')
+            .eq('auth_id', session.user.id)
             .single();
 
           if (userData) {
             if (userData.admin) {
               router.push('/admin');
             } else if (userData.pro) {
-              router.push('/pro');
+              // Gérer l'onboarding
+              if (userData.onboarding_status !== 'completed') {
+                router.push(getOnboardingPath(userData.onboarding_status));
+              } else {
+                router.push('/pro');
+              }
             } else {
               router.push('/');
             }
@@ -68,35 +72,55 @@ export default function LoginPage() {
         return;
       }
 
-      // Appelle la route API pour faire la connexion côté serveur
-      const response = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      // Connexion directe côté client via localStorage
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      const data = await response.json();
+      if (signInError) throw signInError;
+      if (!data.user) throw new Error('No user returned');
 
-      if (!response.ok) {
-        setError(data.error || "Erreur lors de la connexion");
-        setLoading(false);
-        return;
+      console.log("✅ Connecté:", data.user.email);
+
+      // Vérifier le rôle de l'utilisateur
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('pro, admin, onboarding_status')
+        .eq('auth_id', data.user.id)
+        .single();
+
+      if (userError) throw userError;
+
+      // Vérifier que l'utilisateur est pro ou admin
+      if (!userData.pro && !userData.admin) {
+        await supabase.auth.signOut();
+        throw new Error('Cet espace est réservé aux professionnels');
       }
 
-      console.log("✅ Connecté:", data.user?.email);
-
-      // Rediriger vers l'espace admin si l'utilisateur est admin
-      if (data.isAdmin) {
-        router.push("/admin");
-      } else {
-        router.push("/pro");
+      // Redirection basée sur le rôle et l'état d'onboarding
+      if (userData.admin) {
+        router.push('/admin');
+      } else if (userData.pro) {
+        if (userData.onboarding_status !== 'completed') {
+          router.push(getOnboardingPath(userData.onboarding_status));
+        } else {
+          router.push('/pro');
+        }
       }
     } catch (err) {
-      console.error("Erreur:", err);
-      setError("Une erreur s'est produite");
+      console.error("❌ Erreur de connexion:", err);
+      setError(err instanceof Error ? err.message : 'Erreur de connexion');
       setLoading(false);
+    }
+  };
+
+  const getOnboardingPath = (status: string | null): string => {
+    switch (status) {
+      case 'plan_selected': return '/onboarding/business';
+      case 'business_info': return '/onboarding/loyalty';
+      case 'loyalty_setup': return '/onboarding/welcome';
+      default: return '/onboarding/plan';
     }
   };
 
@@ -113,7 +137,6 @@ export default function LoginPage() {
         return;
       }
 
-      const supabase = createClient();
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });

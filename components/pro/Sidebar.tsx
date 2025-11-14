@@ -4,8 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Settings, CreditCard, Users, HelpCircle, LifeBuoy } from "lucide-react";
 import LogOutButton from "@/components/common/LogOutButton";
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/clients/browser";
+import { useAuth } from "@/contexts/AuthContext";
 
 const menuItems = [
   {
@@ -40,30 +39,43 @@ const menuItems = [
   },
 ];
 
+/**
+ * Sidebar de l'espace professionnel
+ * Utilise le hook useAuth() pour récupérer les informations utilisateur depuis AuthContext
+ */
 export default function Sidebar() {
   const pathname = usePathname();
-  const [userName, setUserName] = useState<string>('');
+  const { userProfile } = useAuth();
 
-  useEffect(() => {
-    const fetchUserName = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+  // Générer les initiales pour l'avatar
+  const getInitials = () => {
+    if (!userProfile) return 'U';
 
-      if (user) {
-        const { data: dbUser } = await supabase
-          .from('users')
-          .select('user_firstname, user_lastname')
-          .eq('auth_id', user.id)
-          .single();
+    const firstName = userProfile.user_firstname || (userProfile as any).first_name || '';
+    const lastName = userProfile.user_lastname || (userProfile as any).last_name || '';
 
-        if (dbUser) {
-          setUserName(`${dbUser.user_firstname} ${dbUser.user_lastname}`);
-        }
-      }
-    };
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    } else if (firstName) {
+      return firstName[0].toUpperCase();
+    }
 
-    fetchUserName();
-  }, []);
+    return 'U';
+  };
+
+  // Obtenir le nom complet
+  const getFullName = () => {
+    if (!userProfile) return 'Utilisateur';
+
+    const firstName = userProfile.user_firstname || (userProfile as any).first_name || '';
+    const lastName = userProfile.user_lastname || (userProfile as any).last_name || '';
+
+    if (firstName || lastName) {
+      return `${firstName} ${lastName}`.trim();
+    }
+
+    return 'Utilisateur';
+  };
 
   return (
     <aside className="w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col">
@@ -71,10 +83,10 @@ export default function Sidebar() {
       <div className="p-6 border-b border-slate-700">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-            {userName ? userName.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
+            {getInitials()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm truncate">{userName || 'Utilisateur'}</p>
+            <p className="font-semibold text-sm truncate">{getFullName()}</p>
             <p className="text-xs text-slate-400">Espace Pro</p>
           </div>
         </div>

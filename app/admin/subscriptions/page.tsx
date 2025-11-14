@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/clients/browser";
+import { supabase } from "@/lib/supabase/clients/browser";
 import { Plus, Edit, Trash2, Tag } from "lucide-react";
 
 interface SubscriptionPlan {
@@ -52,7 +52,6 @@ export default function SubscriptionsPage() {
 
   const fetchPlans = async () => {
     try {
-      const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session?.access_token) {
@@ -107,7 +106,6 @@ export default function SubscriptionsPage() {
     e.preventDefault();
 
     try {
-      const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session?.access_token) {
@@ -182,7 +180,6 @@ export default function SubscriptionsPage() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce plan ?")) return;
 
     try {
-      const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session?.access_token) {
