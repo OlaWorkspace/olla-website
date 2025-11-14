@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/clients/browser';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import Link from 'next/link';
 
 interface Business {
@@ -32,9 +33,17 @@ interface PlanInfo {
   maxPrograms: number | null;
 }
 
+/**
+ * Page de gestion des paramètres pour les professionnels
+ * Utilise useAuth() et useEdgeFunction() pour toutes les opérations
+ */
 export default function ParametresPage() {
+  const { user, userProfile } = useAuth();
+  const { callFunction } = useEdgeFunction();
+
   const [loading, setLoading] = useState(true);
   const [business, setBusiness] = useState<Business | null>(null);
+  const [businessId, setBusinessId] = useState<string | null>(null);
   const [programs, setPrograms] = useState<LoyaltyProgram[]>([]);
   const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
   const [canAddMore, setCanAddMore] = useState(false);
@@ -49,113 +58,72 @@ export default function ParametresPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [userId, setUserId] = useState<string | null>(null);
-  const [authId, setAuthId] = useState<string | null>(null);
-
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (user && userProfile) {
+      fetchData();
+    }
+  }, [user, userProfile]);
 
   const fetchData = async () => {
+    if (!user || !userProfile) return;
+
     try {
       setLoading(true);
       setError(null);
 
-      const supabase = createClient();
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-
-      if (!authUser) {
-        setError('Utilisateur non authentifié');
-        return;
-      }
-
-      const { data: dbUser, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authUser.id)
-        .single();
-
-      if (userError || !dbUser) {
-        setError('Impossible de récupérer les données utilisateur');
-        return;
-      }
-
-      setUserId(dbUser.id);
-      setAuthId(authUser.id);
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        setError('Session expirée');
-        return;
-      }
-
       // Récupérer le commerce via l'edge function
-      const businessResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-get-business-info`,
+      const { data: businessData, error: businessError } = await callFunction(
+        'web-get-business-info',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            userId: dbUser.id,
-            authId: authUser.id,
-          }),
+          userId: userProfile.id,
+          authId: user.id,
         }
       );
 
-      if (!businessResponse.ok) {
-        const errorData = await businessResponse.json();
-        setError(errorData.error || 'Erreur lors de la récupération du commerce');
+      if (businessError) {
+        setError(businessError);
         return;
       }
 
-      const businessResult = await businessResponse.json();
-      if (!businessResult.success) {
-        setError(businessResult.error || 'Erreur lors de la récupération du commerce');
+      if (!businessData || !businessData.business) {
+        setError('Aucun commerce trouvé');
         return;
       }
 
-      const businessData = businessResult.data.business;
-      const retrievedBusinessId = businessResult.data.businessId;
+      const retrievedBusiness = businessData.business;
+      const retrievedBusinessId = businessData.businessId;
 
-      setBusiness(businessData as Business);
-      setBusinessForm(businessData as Business);
+      setBusiness(retrievedBusiness);
+      setBusinessId(retrievedBusinessId);
+      setBusinessForm(retrievedBusiness);
 
       // Récupérer les programmes de fidélité
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-manage-loyalty-programs`,
+      const { data: programsData, error: programsError } = await callFunction(
+        'web-manage-loyalty-programs',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            userId: dbUser.id,
-            authId: authUser.id,
-            businessId: retrievedBusinessId,
-            action: 'list',
-          }),
+          userId: userProfile.id,
+          authId: user.id,
+          businessId: retrievedBusinessId,
+          action: 'list',
         }
       );
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des programmes');
+      if (programsError) {
+        console.error('❌ Error fetching programs:', programsError);
+        return;
       }
 
-      const result = await response.json();
-      if (result.success) {
-        setPrograms(result.data.programs || []);
+      if (programsData) {
+        setPrograms(programsData.programs || []);
         setPlanInfo({
-          slug: result.data.planSlug,
-          name: result.data.planSlug === 'free' ? 'Gratuit' : result.data.planSlug,
-          maxPrograms: result.data.maxPrograms
+          slug: programsData.planSlug,
+          name: programsData.planSlug === 'free' ? 'Gratuit' : programsData.planSlug,
+          maxPrograms: programsData.maxPrograms
         });
-        setCanAddMore(result.data.canAddMore);
+        setCanAddMore(programsData.canAddMore);
       }
     } catch (err) {
+      console.error('❌ Error in fetchData:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
@@ -163,102 +131,71 @@ export default function ParametresPage() {
   };
 
   const handleUpdateBusiness = async () => {
+    if (!user || !userProfile || !business || !businessId) return;
+
     try {
       setError(null);
       setSuccess(null);
 
-      if (!userId || !authId || !business) return;
-
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        setError('Session expirée');
-        return;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-update-business`,
+      const { data: updateData, error: updateError } = await callFunction(
+        'web-update-business',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            userId,
-            authId,
-            businessId: business.id,
-            updates: businessForm,
-          }),
+          userId: userProfile.id,
+          authId: user.id,
+          businessId: businessId,
+          updates: businessForm,
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur lors de la mise à jour');
+      if (updateError) {
+        throw new Error(updateError);
       }
 
-      const result = await response.json();
-      if (result.success) {
-        setBusiness(result.data.business);
+      if (updateData && updateData.business) {
+        setBusiness(updateData.business);
         setEditingBusiness(false);
         setSuccess('Commerce mis à jour avec succès');
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
+      console.error('❌ Error updating business:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     }
   };
 
   const handleCreateProgram = async () => {
+    if (!user || !userProfile || !businessId) return;
+
+    if (!programForm.reward_label || programForm.point_needed <= 0) {
+      setError('Veuillez remplir tous les champs');
+      return;
+    }
+
     try {
       setError(null);
       setSuccess(null);
 
-      if (!userId || !authId || !business) return;
-      if (!programForm.reward_label || programForm.point_needed <= 0) {
-        setError('Veuillez remplir tous les champs');
-        return;
-      }
-
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        setError('Session expirée');
-        return;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-manage-loyalty-programs`,
+      const { data: createData, error: createError } = await callFunction(
+        'web-manage-loyalty-programs',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            userId,
-            authId,
-            businessId: business.id,
-            action: 'create',
-            programData: programForm,
-          }),
+          userId: userProfile.id,
+          authId: user.id,
+          businessId: businessId,
+          action: 'create',
+          programData: programForm,
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.code === 'PLAN_LIMIT_REACHED') {
-          setError(errorData.error);
-          return;
+      if (createError) {
+        if (createError.includes('PLAN_LIMIT_REACHED')) {
+          setError(createError);
+        } else {
+          throw new Error(createError);
         }
-        throw new Error(errorData.error || 'Erreur lors de la création');
+        return;
       }
 
-      const result = await response.json();
-      if (result.success) {
+      if (createData) {
         await fetchData();
         setCreatingProgram(false);
         setProgramForm({ point_needed: 10, reward_label: '' });
@@ -266,51 +203,35 @@ export default function ParametresPage() {
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
+      console.error('❌ Error creating program:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     }
   };
 
   const handleUpdateProgram = async (programId: string) => {
+    if (!user || !userProfile || !businessId) return;
+
     try {
       setError(null);
       setSuccess(null);
 
-      if (!userId || !authId || !business) return;
-
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        setError('Session expirée');
-        return;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-manage-loyalty-programs`,
+      const { data: updateData, error: updateError } = await callFunction(
+        'web-manage-loyalty-programs',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            userId,
-            authId,
-            businessId: business.id,
-            action: 'update',
-            programId,
-            programData: programForm,
-          }),
+          userId: userProfile.id,
+          authId: user.id,
+          businessId: businessId,
+          action: 'update',
+          programId,
+          programData: programForm,
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur lors de la mise à jour');
+      if (updateError) {
+        throw new Error(updateError);
       }
 
-      const result = await response.json();
-      if (result.success) {
+      if (updateData) {
         await fetchData();
         setEditingProgram(null);
         setProgramForm({ point_needed: 10, reward_label: '' });
@@ -318,57 +239,41 @@ export default function ParametresPage() {
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
+      console.error('❌ Error updating program:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     }
   };
 
   const handleDeleteProgram = async (programId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce programme ?')) return;
+    if (!user || !userProfile || !businessId) return;
 
     try {
       setError(null);
       setSuccess(null);
 
-      if (!userId || !authId || !business) return;
-
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        setError('Session expirée');
-        return;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-manage-loyalty-programs`,
+      const { data: deleteData, error: deleteError } = await callFunction(
+        'web-manage-loyalty-programs',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            userId,
-            authId,
-            businessId: business.id,
-            action: 'delete',
-            programId,
-          }),
+          userId: userProfile.id,
+          authId: user.id,
+          businessId: businessId,
+          action: 'delete',
+          programId,
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur lors de la suppression');
+      if (deleteError) {
+        throw new Error(deleteError);
       }
 
-      const result = await response.json();
-      if (result.success) {
+      if (deleteData) {
         await fetchData();
         setSuccess('Programme supprimé avec succès');
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
+      console.error('❌ Error deleting program:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     }
   };
@@ -376,7 +281,10 @@ export default function ParametresPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-slate-600">Chargement...</p>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-slate-200 rounded-full border-t-primary animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Chargement...</p>
+        </div>
       </div>
     );
   }
@@ -384,7 +292,15 @@ export default function ParametresPage() {
   if (!business) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-600">Aucun commerce trouvé</p>
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || 'Aucun commerce trouvé'}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
+          >
+            Réessayer
+          </button>
+        </div>
       </div>
     );
   }

@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/clients/browser';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import Link from 'next/link';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
@@ -72,7 +73,14 @@ interface DashboardData {
   };
 }
 
+/**
+ * Page dashboard principale pour les professionnels
+ * Utilise useAuth() et useEdgeFunction() pour récupérer les données
+ */
 export default function DashboardPage() {
+  const { user, userProfile } = useAuth();
+  const { callFunction } = useEdgeFunction();
+
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,85 +88,56 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchDashboard = async () => {
+      if (!user || !userProfile) {
+        setError('Utilisateur non authentifié');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const supabase = createClient();
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
+        setLoading(true);
+        setError(null);
 
-        if (!authUser) {
-          setError('User not authenticated');
-          return;
+        const { data: dashboardData, error: dashboardError } = await callFunction('web-get-pro-dashboard', {
+          userId: userProfile.id,
+          authId: user.id,
+          businessId: selectedBusinessId,
+        });
+
+        if (dashboardError) {
+          throw new Error(dashboardError);
         }
 
-        const { data: dbUser, error: userError } = await supabase
-          .from('users')
-          .select('id')
-          .eq('auth_id', authUser.id)
-          .single();
-
-        if (userError || !dbUser) {
-          setError('Failed to fetch user data');
-          return;
-        }
-
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!session?.access_token) {
-          setError('No access token available');
-          return;
-        }
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-get-pro-dashboard`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({
-              userId: dbUser.id,
-              authId: authUser.id,
-              businessId: selectedBusinessId,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `Failed to fetch dashboard data (${response.status})`);
-        }
-
-        const result = await response.json();
-        if (result.success) {
-          setData(result.data);
+        if (dashboardData) {
+          setData(dashboardData);
         } else {
-          setError(result.error || 'Failed to fetch data');
+          setError('Aucune donnée retournée');
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.error('❌ Error fetching dashboard:', err);
+        setError(err instanceof Error ? err.message : 'Erreur inconnue');
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboard();
-  }, [selectedBusinessId]);
+  }, [user, userProfile, selectedBusinessId, callFunction]);
 
-  // Sélectionner automatiquement le premier commerce au chargement (il n'y en aura qu'un)
+  // Sélectionner automatiquement le premier commerce au chargement
   useEffect(() => {
-    if (data?.businesses && data.businesses.length > 0) {
+    if (data?.businesses && data.businesses.length > 0 && !selectedBusinessId) {
       setSelectedBusinessId(data.businesses[0].id);
     }
-  }, [data?.businesses]);
+  }, [data?.businesses, selectedBusinessId]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-slate-600">Chargement...</p>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-slate-200 rounded-full border-t-primary animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Chargement...</p>
+        </div>
       </div>
     );
   }
@@ -166,7 +145,15 @@ export default function DashboardPage() {
   if (error || !data) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-600">{error || 'Erreur lors du chargement'}</p>
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || 'Erreur lors du chargement'}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
+          >
+            Réessayer
+          </button>
+        </div>
       </div>
     );
   }
