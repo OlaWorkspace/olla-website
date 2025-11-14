@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/clients/browser";
+import { supabase } from "@/lib/supabase/clients/browser";
 import { LogOut } from "lucide-react";
 
 interface LogOutButtonProps {
   className?: string;
 }
 
+/**
+ * Bouton de déconnexion utilisant l'instance singleton Supabase
+ * Déconnecte l'utilisateur et le redirige vers la page de login
+ */
 export default function LogOutButton({ className }: LogOutButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
 
   const handleSignOut = async () => {
     setLoading(true);
@@ -20,7 +23,7 @@ export default function LogOutButton({ className }: LogOutButtonProps) {
       await supabase.auth.signOut();
       router.push("/auth/login");
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("❌ Error signing out:", error);
     } finally {
       setLoading(false);
     }
