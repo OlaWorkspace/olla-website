@@ -91,7 +91,7 @@ export default function ComptesPage() {
     };
 
     fetchData();
-  }, [user, userProfile, callFunction]);
+  }, [user, userProfile]); // callFunction est stable grâce à useCallback
 
   if (loading) {
     return (

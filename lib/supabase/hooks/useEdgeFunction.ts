@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { supabase } from '@/lib/supabase/clients/browser';
 
 /**
@@ -19,7 +20,7 @@ import { supabase } from '@/lib/supabase/clients/browser';
  * ```
  */
 export function useEdgeFunction() {
-  const callFunction = async <T = any>(
+  const callFunction = useCallback(async <T = any>(
     functionName: string,
     payload: Record<string, any>
   ): Promise<{ data: T | null; error: string | null }> => {
@@ -94,7 +95,7 @@ export function useEdgeFunction() {
         error: err instanceof Error ? err.message : 'Unknown error'
       };
     }
-  };
+  }, []); // Mémorisé - ne change jamais
 
   return { callFunction };
 }

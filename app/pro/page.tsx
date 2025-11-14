@@ -122,7 +122,7 @@ export default function DashboardPage() {
     };
 
     fetchDashboard();
-  }, [user, userProfile, selectedBusinessId, callFunction]);
+  }, [user, userProfile, selectedBusinessId]); // callFunction est stable grâce à useCallback
 
   // Sélectionner automatiquement le premier commerce au chargement
   useEffect(() => {

@@ -79,7 +79,7 @@ export default function AbonnementsPage() {
     };
 
     fetchSubscriptions();
-  }, [user, userProfile, callFunction]);
+  }, [user, userProfile]); // callFunction est stable grâce à useCallback
 
   const handleChangePlan = async (planSlug: string) => {
     if (changingPlan || !user || !userProfile) return;
