@@ -47,7 +47,6 @@ async function getPlans(): Promise<Plan[]> {
     );
 
     if (!response.ok) {
-      console.error('Failed to fetch plans:', response.statusText);
       return [];
     }
 
@@ -63,7 +62,6 @@ async function getPlans(): Promise<Plan[]> {
 
     return [];
   } catch (error) {
-    console.error('Error fetching plans:', error);
     return [];
   }
 }
