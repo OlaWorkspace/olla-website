@@ -36,6 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let initialLoadComplete = false;
+
     // Récupération initiale de la session depuis localStorage
     console.log('🔄 Initializing AuthContext...');
     supabase.auth.getSession().then(({ data: { session }, error }) => {
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('⚠️ No initial session found');
         setLoading(false);
       }
+      initialLoadComplete = true;
     });
 
     // Écoute des changements d'authentification
@@ -54,15 +57,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         console.log('🔐 Auth state changed:', event, 'hasSession:', !!session);
 
-        // Si c'est un événement initial, ne rien faire (déjà géré par getSession)
-        if (event === 'INITIAL_SESSION') {
+        // Ignorer tous les événements jusqu'à ce que le chargement initial soit terminé
+        if (!initialLoadComplete) {
+          console.log('⏭️ Skipping auth change - initial load not complete');
+          return;
+        }
+
+        // Ignorer INITIAL_SESSION et SIGNED_IN si on a déjà un user
+        if (event === 'INITIAL_SESSION' || (event === 'SIGNED_IN' && user)) {
+          console.log('⏭️ Skipping redundant auth event');
           return;
         }
 
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          setLoading(true); // Important : activer le loading avant de charger le profil
+          setLoading(true);
           await loadUserProfile(session.user.id);
         } else {
           setUserProfile(null);
