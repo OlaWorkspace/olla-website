@@ -37,11 +37,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Récupération initiale de la session depuis localStorage
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    console.log('🔄 Initializing AuthContext...');
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log('📦 Initial session:', !!session, 'error:', error);
       setUser(session?.user ?? null);
       if (session?.user) {
         loadUserProfile(session.user.id);
       } else {
+        console.log('⚠️ No initial session found');
         setLoading(false);
       }
     });
@@ -49,10 +52,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Écoute des changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔐 Auth state changed:', event);
+        console.log('🔐 Auth state changed:', event, 'hasSession:', !!session);
+
+        // Si c'est un événement initial, ne rien faire (déjà géré par getSession)
+        if (event === 'INITIAL_SESSION') {
+          return;
+        }
+
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          setLoading(true); // Important : activer le loading avant de charger le profil
           await loadUserProfile(session.user.id);
         } else {
           setUserProfile(null);
@@ -69,17 +79,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   const loadUserProfile = async (userId: string) => {
     try {
+      console.log('📥 Loading user profile for:', userId);
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('auth_id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error loading user profile:', error);
+        setError(error.message);
+        setUserProfile(null);
+        return;
+      }
+
+      console.log('✅ User profile loaded:', data?.pro ? 'Pro' : 'User', data?.admin ? '(Admin)' : '');
       setUserProfile(data);
+      setError(null);
     } catch (err) {
-      console.error('❌ Error loading user profile:', err);
+      console.error('❌ Exception loading user profile:', err);
       setError(err instanceof Error ? err.message : 'Failed to load profile');
+      setUserProfile(null);
     } finally {
       setLoading(false);
     }
