@@ -25,17 +25,35 @@ export function useEdgeFunction() {
   ): Promise<{ data: T | null; error: string | null }> => {
     try {
       // Récupération du token depuis localStorage via getSession()
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      console.log('🔍 Session debug:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        hasToken: !!session?.access_token,
+        sessionError: sessionError,
+        userId: session?.user?.id,
+        tokenPrefix: session?.access_token ? session.access_token.substring(0, 20) + '...' : 'none'
+      });
+
       const token = session?.access_token;
 
       if (!token) {
-        console.warn('⚠️ No access token found - user might not be authenticated');
+        console.error('❌ No access token found - user not authenticated');
+        return {
+          data: null,
+          error: 'Non authentifié - veuillez vous reconnecter'
+        };
       }
 
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const functionUrl = `${supabaseUrl}/functions/v1/${functionName}`;
 
-      console.log(`🚀 Calling Edge Function: ${functionName}`);
+      console.log(`🚀 Calling Edge Function: ${functionName}`, {
+        url: functionUrl,
+        hasToken: !!token,
+        payload
+      });
 
       const response = await fetch(functionUrl, {
         method: 'POST',
