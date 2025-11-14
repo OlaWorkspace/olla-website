@@ -1,71 +1,53 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/clients/browser";
-import { Settings, Users, CreditCard, LogOut } from "lucide-react";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase/clients/browser';
+import { Settings, Users, CreditCard, LogOut } from 'lucide-react';
 
+/**
+ * Layout protégé pour l'espace admin
+ * Vérifie que l'utilisateur est connecté et a le statut "admin"
+ */
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { user, userProfile, loading, isAdmin } = useAuth();
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const supabase = createClient();
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
-
-        if (!authUser) {
-          router.push("/auth/login");
-          return;
-        }
-
-        const { data: userData } = await supabase
-          .from("users")
-          .select("admin")
-          .eq("auth_id", authUser.id)
-          .single();
-
-        if (!userData?.admin) {
-          router.push("/pro");
-          return;
-        }
-
-        setIsAdmin(true);
-      } catch (error) {
-        console.error("Error checking admin status:", error);
-        router.push("/auth/login");
-      } finally {
-        setLoading(false);
+    if (!loading) {
+      if (!user) {
+        router.push('/auth/login');
+      } else if (!isAdmin) {
+        router.push('/pro');
       }
-    };
-
-    checkAdmin();
-  }, [router]);
+    }
+  }, [user, isAdmin, loading, router]);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push('/auth/login');
   };
 
+  // Afficher un écran de chargement pendant la vérification
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-slate-600">Chargement...</p>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-slate-200 rounded-full border-t-primary animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Chargement...</p>
+        </div>
       </div>
     );
   }
 
-  if (!isAdmin) {
+  // Ne rien afficher si l'utilisateur n'est pas admin
+  if (!user || !isAdmin) {
     return null;
   }
 
@@ -75,6 +57,9 @@ export default function AdminLayout({
       <aside className="w-64 bg-white shadow-lg">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-slate-900">Admin Panel</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            {userProfile?.first_name} {userProfile?.last_name}
+          </p>
         </div>
 
         <nav className="mt-6">

@@ -1,20 +1,41 @@
 'use client';
 
-import { createClient } from '@/lib/supabase/clients/browser';
+import { supabase } from '@/lib/supabase/clients/browser';
 
+/**
+ * Hook pour appeler les Supabase Edge Functions
+ *
+ * Récupère automatiquement le token d'accès depuis la session localStorage
+ * et l'envoie dans le header Authorization
+ *
+ * @example
+ * ```tsx
+ * const { callFunction } = useEdgeFunction();
+ *
+ * const { data, error } = await callFunction('my-function', {
+ *   param1: 'value1',
+ *   param2: 'value2'
+ * });
+ * ```
+ */
 export function useEdgeFunction() {
-  const supabase = createClient();
-
   const callFunction = async <T = any>(
     functionName: string,
     payload: Record<string, any>
   ): Promise<{ data: T | null; error: string | null }> => {
     try {
+      // Récupération du token depuis localStorage via getSession()
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
 
+      if (!token) {
+        console.warn('⚠️ No access token found - user might not be authenticated');
+      }
+
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const functionUrl = `${supabaseUrl}/functions/v1/${functionName}`;
+
+      console.log(`🚀 Calling Edge Function: ${functionName}`);
 
       const response = await fetch(functionUrl, {
         method: 'POST',
@@ -28,6 +49,7 @@ export function useEdgeFunction() {
       const responseData = await response.json();
 
       if (!response.ok) {
+        console.error(`❌ Edge Function ${functionName} failed:`, responseData);
         return {
           data: null,
           error: responseData?.error || `Function call failed with status ${response.status}`
@@ -35,17 +57,20 @@ export function useEdgeFunction() {
       }
 
       if (responseData?.error) {
+        console.error(`❌ Edge Function ${functionName} returned error:`, responseData.error);
         return {
           data: null,
           error: responseData.error
         };
       }
 
+      console.log(`✅ Edge Function ${functionName} succeeded`);
       return {
         data: responseData?.data || responseData,
         error: null
       };
     } catch (err) {
+      console.error(`❌ Exception calling Edge Function ${functionName}:`, err);
       return {
         data: null,
         error: err instanceof Error ? err.message : 'Unknown error'

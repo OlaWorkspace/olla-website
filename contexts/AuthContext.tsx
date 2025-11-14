@@ -1,13 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/clients/browser';
+import { supabase } from '@/lib/supabase/clients/browser';
 import { User } from '@supabase/supabase-js';
 import type { User as UserProfile } from '@/types';
 
-// Create Supabase client at module level (shared across all instances)
-const supabase = createClient();
-
+/**
+ * Interface du contexte d'authentification
+ */
 interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
@@ -15,10 +15,20 @@ interface AuthContextType {
   error: string | null;
   isAuthenticated: boolean;
   isPro: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Provider d'authentification basé sur localStorage
+ *
+ * Gère automatiquement:
+ * - La récupération de la session depuis localStorage
+ * - L'écoute des changements d'authentification
+ * - Le chargement du profil utilisateur depuis la table 'users'
+ * - La mise à jour de l'état en temps réel
+ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -26,86 +36,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const checkAuth = async () => {
-      try {
-        // Use getSession instead of getUser for faster response
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-        if (sessionError) {
-          if (isMounted) {
-            setError(sessionError.message);
-            setLoading(false);
-          }
-          return;
-        }
-
-        const authUser = session?.user || null;
-
-        if (!isMounted) return;
-        setUser(authUser);
-
-        if (authUser) {
-          const { data: profile, error: profileError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('auth_id', authUser.id)
-            .single();
-
-          if (!isMounted) return;
-
-          if (profileError) {
-            setError(profileError.message);
-          } else if (profile) {
-            setUserProfile(profile);
-          }
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Unknown error');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+    // Récupération initiale de la session depuis localStorage
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        loadUserProfile(session.user.id);
+      } else {
+        setLoading(false);
       }
-    };
+    });
 
-    checkAuth();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []); // Empty deps since supabase is now a module-level constant
-
-  useEffect(() => {
+    // Écoute des changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // Skip INITIAL_SESSION to avoid race condition with checkAuth
-        if (event === 'INITIAL_SESSION') {
-          return;
-        }
+        console.log('🔐 Auth state changed:', event);
+        setUser(session?.user ?? null);
 
         if (session?.user) {
-          setUser(session.user);
-          const { data: profile } = await supabase
-            .from('users')
-            .select('*')
-            .eq('auth_id', session.user.id)
-            .single();
-          setUserProfile(profile);
+          await loadUserProfile(session.user.id);
         } else {
-          setUser(null);
           setUserProfile(null);
+          setLoading(false);
         }
       }
     );
 
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, []); // Empty deps since supabase is now a module-level constant
+    return () => subscription.unsubscribe();
+  }, []);
+
+  /**
+   * Charge le profil utilisateur depuis la table 'users'
+   */
+  const loadUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_id', userId)
+        .single();
+
+      if (error) throw error;
+      setUserProfile(data);
+    } catch (err) {
+      console.error('❌ Error loading user profile:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -115,7 +93,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         error,
         isAuthenticated: !!user,
-        isPro: userProfile?.pro || false
+        isPro: userProfile?.pro || false,
+        isAdmin: userProfile?.admin || false,
       }}
     >
       {children}
@@ -123,6 +102,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Hook pour accéder au contexte d'authentification
+ *
+ * @throws {Error} Si utilisé en dehors du AuthProvider
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { UserPlus, Mail, Lock, User, CheckCircle2, CreditCard, Building2, Gift } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
-import { createClient } from "@/lib/supabase/clients/browser";
+import { supabase } from "@/lib/supabase/clients/browser";
 
 interface FormData {
   firstName: string;
@@ -26,7 +26,6 @@ interface FormErrors {
 
 export default function SignupPage() {
   const router = useRouter();
-  const supabase = createClient();
 
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -88,45 +87,61 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/auth/sign-up", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // Inscription directe côté client via localStorage
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            pro: true,
+          },
         },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword
-        }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessage = data.error || "Erreur lors de l'inscription";
-        if (errorMessage.includes('already registered') || errorMessage.includes('User already')) {
+      if (signUpError) {
+        console.error('❌ Signup error:', signUpError);
+        if (signUpError.message.includes('already registered') || signUpError.message.includes('User already')) {
           setErrors(prev => ({ ...prev, email: 'Cet email est déjà enregistré' }));
         } else {
-          setErrors(prev => ({ ...prev, email: errorMessage }));
+          setErrors(prev => ({ ...prev, email: signUpError.message }));
         }
         setLoading(false);
         return;
       }
 
-      // Connexion immédiate avec les identifiants
-      await supabase.auth.signInWithPassword({
+      if (!data.user) {
+        setErrors(prev => ({ ...prev, email: 'Erreur lors de la création du compte' }));
+        setLoading(false);
+        return;
+      }
+
+      console.log('✅ Inscription réussie:', data.user.email);
+
+      // Connexion immédiate avec les identifiants (si email confirmation n'est pas requise)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
 
+      if (signInError) {
+        console.log('⚠️ Auto sign-in failed (email confirmation may be required):', signInError);
+        // Si la confirmation email est requise, rediriger vers une page d'information
+        setErrors(prev => ({
+          ...prev,
+          email: 'Compte créé ! Vérifiez votre email pour confirmer votre inscription.'
+        }));
+        setLoading(false);
+        return;
+      }
+
       // Redirection vers onboarding/plan pour sélectionner le plan
-      router.push("/onboarding/plan");
+      router.push('/onboarding/plan');
 
     } catch (error: any) {
+      console.error('❌ Exception during signup:', error);
       setErrors(prev => ({ ...prev, email: error.message || "Une erreur est survenue" }));
-    } finally {
       setLoading(false);
     }
   };
