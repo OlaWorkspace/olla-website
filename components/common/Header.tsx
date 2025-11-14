@@ -3,10 +3,36 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, userProfile, loading } = useAuth();
+  const router = useRouter();
+
+  // Fonction pour gérer le clic sur "Espace Pro"
+  const handleProSpaceClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    // Si en cours de chargement, ne rien faire
+    if (loading) return;
+
+    // Si utilisateur connecté, rediriger vers son espace
+    if (user && userProfile) {
+      if (userProfile.admin) {
+        router.push('/admin');
+      } else if (userProfile.pro) {
+        router.push('/pro');
+      } else {
+        router.push('/auth/login');
+      }
+    } else {
+      // Pas connecté, aller vers login
+      router.push('/auth/login');
+    }
+  };
 
   return (
     <header className="bg-white sticky top-0 z-50">
@@ -54,12 +80,13 @@ export default function Header() {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex gap-4">
-          <Link
-            href="/auth/login"
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition font-semibold"
+          <button
+            onClick={handleProSpaceClick}
+            disabled={loading}
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Espaces pro
-          </Link>
+            {loading ? "..." : "Espace pro"}
+          </button>
         </div>
 
         {/* Mobile Menu Button */}
@@ -98,12 +125,13 @@ export default function Header() {
             Contact
           </Link>
           <div className="flex flex-col gap-3">
-            <Link
-              href="/auth/login"
-              className="block px-6 py-2 bg-primary text-white rounded-lg text-center hover:bg-secondary transition font-semibold"
+            <button
+              onClick={handleProSpaceClick}
+              disabled={loading}
+              className="block px-6 py-2 bg-primary text-white rounded-lg text-center hover:bg-secondary transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Espace pro
-            </Link>
+              {loading ? "..." : "Espace pro"}
+            </button>
           </div>
         </div>
       )}
