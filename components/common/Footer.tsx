@@ -73,17 +73,17 @@ export default function Footer() {
             <h4 className="font-semibold text-text text-base mb-4">Légal</h4>
             <ul className="space-y-2 text-sm text-text-light">
               <li>
-                <Link href="#" className="hover:text-primary transition-colors">
+                <Link href="/info/mention-legale" className="hover:text-primary transition-colors">
                   Mentions légales
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-primary transition-colors">
+                <Link href="/info/cgu" className="hover:text-primary transition-colors">
                   CGU
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-primary transition-colors">
+                <Link href="/info/privacy" className="hover:text-primary transition-colors">
                   Politique de confidentialité
                 </Link>
               </li>
@@ -161,17 +161,17 @@ export default function Footer() {
             {openSections['legal'] && (
               <ul className="space-y-2 pb-3 text-xs text-text-light">
                 <li>
-                  <Link href="#" className="hover:text-primary transition-colors block py-1">
+                  <Link href="/info/mention-legale" className="hover:text-primary transition-colors block py-1">
                     Mentions légales
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-primary transition-colors block py-1">
+                  <Link href="/info/cgu" className="hover:text-primary transition-colors block py-1">
                     CGU
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-primary transition-colors block py-1">
+                  <Link href="/info/privacy" className="hover:text-primary transition-colors block py-1">
                     Politique de confidentialité
                   </Link>
                 </li>
