@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import Link from 'next/link';
+import { CATEGORY_OPTIONS, getCategoryKey, getCategoryDisplay } from '@/lib/constants';
 
 interface Business {
   id: string;
@@ -137,13 +138,19 @@ export default function ParametresPage() {
       setError(null);
       setSuccess(null);
 
+      // Préparer les données pour l'envoi API (convertir la catégorie en clé sans icône)
+      const updatesWithCleanCategory = {
+        ...businessForm,
+        category: getCategoryKey(businessForm.category)
+      };
+
       const { data: updateData, error: updateError } = await callFunction(
         'web-update-business',
         {
           userId: userProfile.id,
           authId: user.id,
           businessId: businessId,
-          updates: businessForm,
+          updates: updatesWithCleanCategory,
         }
       );
 
@@ -494,14 +501,20 @@ export default function ParametresPage() {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Catégorie</label>
             {editingBusiness ? (
-              <input
-                type="text"
+              <select
                 value={businessForm.category || ''}
                 onChange={(e) => setBusinessForm({ ...businessForm, category: e.target.value })}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              >
+                <option value="">Sélectionner une catégorie</option>
+                {CATEGORY_OPTIONS.map(cat => (
+                  <option key={cat.key} value={cat.key}>
+                    {cat.icon} {cat.label}
+                  </option>
+                ))}
+              </select>
             ) : (
-              <p className="text-slate-900 py-2">{business.category}</p>
+              <p className="text-slate-900 py-2">{getCategoryDisplay(business.category)}</p>
             )}
           </div>
 

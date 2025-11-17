@@ -8,17 +8,7 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import AddressAutocomplete from './AddressAutocomplete';
-
-const CATEGORIES = [
-  '🍽️ Restaurant',
-  '💇 Coiffeur',
-  '☕ Café',
-  '🛍️ Boutique',
-  '💪 Sport',
-  '🏥 Services',
-  '✨ Beauté',
-  '📚 Autre'
-];
+import { CATEGORY_OPTIONS, getCategoryKey, getCategoryDisplay } from '@/lib/constants';
 
 interface FormData {
   businessName: string;
@@ -130,13 +120,19 @@ export default function BusinessCreation() {
       // Sauvegarder les données du commerce dans le contexte
       setBusinessData(formData);
 
+      // Préparer les données pour l'envoi API (sans les icônes, seulement la clé)
+      const apiFormData = {
+        ...formData,
+        category: getCategoryKey(formData.category)
+      };
+
       // Save progress to database
       const { error: saveError } = await callFunction('web-save-onboarding-progress', {
         userId: userProfile.id,
         authId: user.id,
         step: 'business_info',
         data: {
-          businessData: formData,
+          businessData: apiFormData,
           selectedPlan: selectedPlan // Keep plan data in case they return
         }
       });
@@ -282,8 +278,10 @@ export default function BusinessCreation() {
               className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50 transition"
             >
               <option value="">Sélectionner une catégorie</option>
-              {CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+              {CATEGORY_OPTIONS.map(cat => (
+                <option key={cat.key} value={cat.key}>
+                  {cat.icon} {cat.label}
+                </option>
               ))}
             </select>
           </div>
