@@ -7,6 +7,7 @@ import { UserPlus, Mail, Lock, User, CheckCircle2, CreditCard, Building2, Gift }
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { supabase } from "@/lib/supabase/clients/browser";
+import { getOnboardingStatus, getOnboardingPath } from "@/lib/utils/onboarding";
 
 interface FormData {
   firstName: string;
@@ -136,8 +137,12 @@ export default function SignupPage() {
         return;
       }
 
-      // Redirection vers onboarding/plan pour sélectionner le plan
-      router.push('/onboarding/plan');
+      // Check if user has an existing onboarding status and redirect accordingly
+      const onboardingStatus = getOnboardingStatus();
+      const redirectPath = getOnboardingPath(onboardingStatus);
+
+      console.log('📍 Redirecting to:', redirectPath, '(status:', onboardingStatus, ')');
+      router.push(redirectPath);
 
     } catch (error: any) {
       console.error('❌ Exception during signup:', error);

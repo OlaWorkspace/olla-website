@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { getOnboardingPath, setOnboardingStatus, OnboardingStatus } from "@/lib/utils/onboarding";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,7 +25,19 @@ export default function Header() {
       if (userProfile.admin) {
         router.push('/admin');
       } else if (userProfile.pro) {
-        router.push('/pro');
+        // Check onboarding status and redirect accordingly
+        const status = userProfile.onboarding_status as OnboardingStatus;
+
+        // Sync with localStorage
+        setOnboardingStatus(status);
+
+        // If onboarding is not completed, redirect to the appropriate step
+        if (status !== 'completed') {
+          router.push(getOnboardingPath(status));
+        } else {
+          // Onboarding completed, go to pro dashboard
+          router.push('/pro');
+        }
       } else {
         router.push('/auth/login');
       }
