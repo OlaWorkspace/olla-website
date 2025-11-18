@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/clients/browser";
+import { clearOnboardingStatus } from "@/lib/utils/onboarding";
 import { LogOut } from "lucide-react";
 
 interface LogOutButtonProps {
@@ -20,6 +21,9 @@ export default function LogOutButton({ className }: LogOutButtonProps) {
   const handleSignOut = async () => {
     setLoading(true);
     try {
+      // Clear onboarding status from localStorage
+      clearOnboardingStatus();
+
       await supabase.auth.signOut();
       router.push("/auth/login");
     } catch (error) {
