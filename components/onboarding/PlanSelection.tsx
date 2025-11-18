@@ -84,7 +84,6 @@ export default function PlanSelection() {
       // Redirection après sauvegarde
       setTimeout(() => {
         router.push('/onboarding/business');
-        router.refresh(); // Force Next.js to refetch and re-render
       }, 300);
     } catch (err) {
       console.error('Error in handleSelectPlan:', err);
@@ -92,7 +91,6 @@ export default function PlanSelection() {
       setOnboardingStatus('plan_selected');
       setTimeout(() => {
         router.push('/onboarding/business');
-        router.refresh(); // Force Next.js to refetch and re-render
       }, 300);
     } finally {
       setSaving(false);
