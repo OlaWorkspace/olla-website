@@ -7,7 +7,6 @@ import { ArrowLeft, CheckCircle2, AlertCircle, Lightbulb } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
-import { useOnboardingGuard } from '@/lib/hooks/useOnboardingGuard';
 import { setOnboardingStatus } from '@/lib/utils/onboarding';
 import AddressAutocomplete from './AddressAutocomplete';
 import { CATEGORY_OPTIONS, getCategoryKey, getCategoryDisplay } from '@/lib/constants';
@@ -33,7 +32,6 @@ export default function BusinessCreation() {
   const { user, userProfile, loading: authLoading } = useAuth();
   const { selectedPlan, setBusinessData } = useOnboarding();
   const { callFunction } = useEdgeFunction();
-  const { isChecking, isAuthorized } = useOnboardingGuard();
 
   const [formData, setFormData] = useState<FormData>({
     businessName: '',
@@ -113,9 +111,12 @@ export default function BusinessCreation() {
         return;
       }
 
-      // Vérifier qu'un plan a été sélectionné
+      // Vérifier qu'un plan a été sélectionné (ordre d'onboarding)
       if (!selectedPlan) {
-        showToast('error', 'Veuillez sélectionner un plan avant de créer votre commerce');
+        showToast('error', 'Vous devez d\'abord sélectionner un plan');
+        setTimeout(() => {
+          router.push('/onboarding/plan');
+        }, 2000);
         setLoading(false);
         return;
       }
@@ -169,23 +170,6 @@ export default function BusinessCreation() {
     formData.category
   ].filter(Boolean).length;
   const progressPercent = (filledFields / 4) * 100;
-
-  // Show loader while checking authorization
-  if (isChecking) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-border rounded-full border-t-primary animate-spin mx-auto mb-4" />
-          <p className="text-text-light">Vérification...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render if not authorized (will redirect)
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <div className="max-w-2xl mx-auto">
