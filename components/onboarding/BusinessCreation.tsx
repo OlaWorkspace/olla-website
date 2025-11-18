@@ -151,6 +151,7 @@ export default function BusinessCreation() {
       showToast('success', 'Informations enregistrées! Redirection...');
       setTimeout(() => {
         router.push('/onboarding/loyalty');
+        router.refresh(); // Force Next.js to refetch and re-render
       }, 1500);
 
     } catch (err) {

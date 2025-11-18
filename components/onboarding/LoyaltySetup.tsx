@@ -179,6 +179,7 @@ export default function LoyaltySetup() {
       // Rediriger vers la page Welcome
       setTimeout(() => {
         router.push('/onboarding/welcome');
+        router.refresh(); // Force Next.js to refetch and re-render
       }, 1000);
 
     } catch (err) {
