@@ -7,6 +7,8 @@ import { Check, Zap, ArrowRight } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
+import { useOnboardingGuard } from '@/lib/hooks/useOnboardingGuard';
+import { setOnboardingStatus } from '@/lib/utils/onboarding';
 import type { Plan } from '@/types';
 
 export default function PlanSelection() {
@@ -14,6 +16,7 @@ export default function PlanSelection() {
   const { user, userProfile, loading: authLoading } = useAuth();
   const { setSelectedPlan } = useOnboarding();
   const { callFunction } = useEdgeFunction();
+  const { isChecking, isAuthorized } = useOnboardingGuard();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,13 +78,17 @@ export default function PlanSelection() {
         // Continue anyway - data is in context
       }
 
+      // Save status to localStorage for instant access on next visit
+      setOnboardingStatus('plan_selected');
+
       // Redirection après sauvegarde
       setTimeout(() => {
         router.push('/onboarding/business');
       }, 300);
     } catch (err) {
       console.error('Error in handleSelectPlan:', err);
-      // Continue anyway - data is in context
+      // Save to localStorage even if API fails
+      setOnboardingStatus('plan_selected');
       setTimeout(() => {
         router.push('/onboarding/business');
       }, 300);
@@ -95,6 +102,23 @@ export default function PlanSelection() {
     if (priceInCents === 0) return 'Gratuit';
     return `${(priceInCents / 100).toFixed(2).replace('.', ',')}€`;
   };
+
+  // Show loader while checking authorization
+  if (isChecking) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-border rounded-full border-t-primary animate-spin mx-auto mb-4" />
+          <p className="text-text-light">Vérification...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authorized (will redirect)
+  if (!isAuthorized) {
+    return null;
+  }
 
   if (loading) {
     return (

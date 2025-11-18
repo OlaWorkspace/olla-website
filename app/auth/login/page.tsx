@@ -7,6 +7,7 @@ import { ArrowLeft, LogIn, UserPlus, Mail, Lock } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { supabase } from "@/lib/supabase/clients/browser";
+import { getOnboardingPath, setOnboardingStatus, OnboardingStatus } from "@/lib/utils/onboarding";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,9 +40,13 @@ export default function LoginPage() {
             if (userData.admin) {
               router.push('/admin');
             } else if (userData.pro) {
+              // Sync onboarding status to localStorage
+              const status = userData.onboarding_status as OnboardingStatus;
+              setOnboardingStatus(status);
+
               // Gérer l'onboarding
-              if (userData.onboarding_status !== 'completed') {
-                router.push(getOnboardingPath(userData.onboarding_status));
+              if (status !== 'completed') {
+                router.push(getOnboardingPath(status));
               } else {
                 router.push('/pro');
               }
@@ -98,12 +103,16 @@ export default function LoginPage() {
         throw new Error('Cet espace est réservé aux professionnels');
       }
 
+      // Sync onboarding status to localStorage
+      const status = userData.onboarding_status as OnboardingStatus;
+      setOnboardingStatus(status);
+
       // Redirection basée sur le rôle et l'état d'onboarding
       if (userData.admin) {
         router.push('/admin');
       } else if (userData.pro) {
-        if (userData.onboarding_status !== 'completed') {
-          router.push(getOnboardingPath(userData.onboarding_status));
+        if (status !== 'completed') {
+          router.push(getOnboardingPath(status));
         } else {
           router.push('/pro');
         }
@@ -112,15 +121,6 @@ export default function LoginPage() {
       console.error("❌ Erreur de connexion:", err);
       setError(err instanceof Error ? err.message : 'Erreur de connexion');
       setLoading(false);
-    }
-  };
-
-  const getOnboardingPath = (status: string | null): string => {
-    switch (status) {
-      case 'plan_selected': return '/onboarding/business';
-      case 'business_info': return '/onboarding/loyalty';
-      case 'loyalty_setup': return '/onboarding/welcome';
-      default: return '/onboarding/plan';
     }
   };
 

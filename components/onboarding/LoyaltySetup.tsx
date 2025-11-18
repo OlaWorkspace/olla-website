@@ -7,6 +7,8 @@ import { ArrowLeft, CheckCircle2, AlertCircle, Gift, Lightbulb, Info } from 'luc
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
+import { useOnboardingGuard } from '@/lib/hooks/useOnboardingGuard';
+import { setOnboardingStatus } from '@/lib/utils/onboarding';
 import { supabase } from '@/lib/supabase/clients/browser';
 
 interface LoyaltyProgram {
@@ -27,6 +29,7 @@ export default function LoyaltySetup() {
   const { user, userProfile, loading: authLoading } = useAuth();
   const { selectedPlan, businessData, setLoyaltyPrograms } = useOnboarding();
   const { callFunction } = useEdgeFunction();
+  const { isChecking, isAuthorized } = useOnboardingGuard();
 
   const [programs, setPrograms] = useState<LoyaltyProgram[]>([]);
 
@@ -168,6 +171,9 @@ export default function LoyaltySetup() {
         .update({ onboarding_status: 'loyalty_setup' })
         .eq('id', userProfile.id);
 
+      // Save status to localStorage for instant access on next visit
+      setOnboardingStatus('loyalty_setup');
+
       showToast('success', 'Programmes créés avec succès!');
 
       // Rediriger vers la page Welcome
@@ -177,9 +183,28 @@ export default function LoyaltySetup() {
 
     } catch (err) {
       showToast('error', err instanceof Error ? err.message : 'Erreur inconnue');
+      // Save to localStorage even if API fails
+      setOnboardingStatus('loyalty_setup');
       setLoading(false);
     }
   };
+
+  // Show loader while checking authorization
+  if (isChecking) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-border rounded-full border-t-primary animate-spin mx-auto mb-4" />
+          <p className="text-text-light">Vérification...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authorized (will redirect)
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="max-w-2xl mx-auto">

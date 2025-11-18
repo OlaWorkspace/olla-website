@@ -7,6 +7,8 @@ import { ArrowLeft, CheckCircle2, AlertCircle, Package, Truck, Smartphone, Credi
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
+import { useOnboardingGuard } from '@/lib/hooks/useOnboardingGuard';
+import { clearOnboardingStatus } from '@/lib/utils/onboarding';
 import { supabase } from '@/lib/supabase/clients/browser';
 
 interface Toast {
@@ -19,6 +21,7 @@ export default function WelcomeKit() {
   const { user, userProfile, loading: authLoading } = useAuth();
   const { selectedPlan, businessData, loyaltyPrograms } = useOnboarding();
   const { callFunction } = useEdgeFunction();
+  const { isChecking, isAuthorized } = useOnboardingGuard();
 
   const [loading, setLoading] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false); // Prevent double click
@@ -62,6 +65,9 @@ export default function WelcomeKit() {
           .from('users')
           .update({ onboarding_status: 'completed', onboarding_data: null })
           .eq('id', userProfile.id);
+
+        // Clear localStorage since onboarding is completed
+        clearOnboardingStatus();
 
         showToast('success', 'Redirection vers votre espace...');
 
@@ -110,6 +116,8 @@ export default function WelcomeKit() {
 
       if (result.data && result.data.businessId) {
         console.log('✅ WelcomeKit - Success! Redirecting to /pro');
+        // Clear localStorage since onboarding is completed
+        clearOnboardingStatus();
         showToast('success', 'Inscription terminée! Redirection...');
         // Redirect immediately without delay
         router.push('/pro');
@@ -126,6 +134,23 @@ export default function WelcomeKit() {
       setIsCompleting(false);
     }
   };
+
+  // Show loader while checking authorization
+  if (isChecking) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-border rounded-full border-t-primary animate-spin mx-auto mb-4" />
+          <p className="text-text-light">Vérification...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authorized (will redirect)
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
