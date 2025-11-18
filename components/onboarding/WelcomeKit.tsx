@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, AlertCircle, Package, Truck, Smartphone, CreditCard, Gift, Zap } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Package, Truck, Smartphone, CreditCard, Gift, Zap } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
@@ -143,26 +143,6 @@ export default function WelcomeKit() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Back Button */}
-      <button
-        onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-primary hover:text-secondary mb-8 transition text-sm font-medium"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Retour
-      </button>
-
-      {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-xs font-semibold text-text">Étape 5/5</h2>
-          <span className="text-xs text-success font-semibold">Presque terminé !</span>
-        </div>
-        <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-          <div className="h-full bg-success transition-all duration-300 w-full" />
-        </div>
-      </div>
-
       {/* Header */}
       <div className="mb-6 text-center">
         <div className="flex justify-center mb-4">

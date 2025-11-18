@@ -3,13 +3,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, AlertCircle, Lightbulb } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Lightbulb, Info } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import { setOnboardingStatus } from '@/lib/utils/onboarding';
 import AddressAutocomplete from './AddressAutocomplete';
+import OpeningHoursInput from './OpeningHoursInput';
 import { CATEGORY_OPTIONS, getCategoryKey, getCategoryDisplay } from '@/lib/constants';
+import { formatPhoneNumber, displayPhoneNumber } from '@/lib/utils/phoneValidation';
 
 interface FormData {
   businessName: string;
@@ -19,7 +21,8 @@ interface FormData {
   phone: string;
   website: string;
   category: string;
-  openingHours: string;
+  openingHours: any;
+  googleReviewLink: string;
 }
 
 interface Toast {
@@ -41,17 +44,48 @@ export default function BusinessCreation() {
     phone: '',
     website: '',
     category: '',
-    openingHours: ''
+    openingHours: null,
+    googleReviewLink: ''
   });
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
+  const [showGoogleHelp, setShowGoogleHelp] = useState(false);
+  const [phoneError, setPhoneError] = useState<string>('');
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, phone: value }));
+
+    // Valider le téléphone en temps réel si l'utilisateur a commencé à taper
+    if (value.trim().length > 0) {
+      const validation = formatPhoneNumber(value);
+      if (!validation.isValid) {
+        setPhoneError(validation.error || 'Format invalide');
+      } else {
+        setPhoneError('');
+      }
+    } else {
+      setPhoneError('');
+    }
+  };
+
+  const handlePhoneBlur = () => {
+    // Formater automatiquement au blur
+    if (formData.phone.trim().length > 0) {
+      const validation = formatPhoneNumber(formData.phone);
+      if (validation.isValid) {
+        setFormData(prev => ({ ...prev, phone: validation.formatted }));
+        setPhoneError('');
+      }
+    }
   };
 
   const showToast = (type: 'success' | 'error', message: string) => {
@@ -92,6 +126,18 @@ export default function BusinessCreation() {
         return;
       }
 
+      // Valider le format du téléphone
+      const phoneValidation = formatPhoneNumber(formData.phone);
+      if (!phoneValidation.isValid) {
+        showToast('error', phoneValidation.error || 'Le format du téléphone est invalide');
+        setPhoneError(phoneValidation.error || 'Format invalide');
+        setLoading(false);
+        return;
+      }
+
+      // Utiliser le numéro formaté pour l'envoi
+      const formattedPhone = phoneValidation.formatted;
+
       if (!formData.category) {
         showToast('error', 'La catégorie est requise');
         setLoading(false);
@@ -121,12 +167,16 @@ export default function BusinessCreation() {
         return;
       }
 
-      // Sauvegarder les données du commerce dans le contexte
-      setBusinessData(formData);
+      // Sauvegarder les données du commerce dans le contexte (avec le numéro formaté)
+      const formDataWithFormattedPhone = {
+        ...formData,
+        phone: formattedPhone
+      };
+      setBusinessData(formDataWithFormattedPhone);
 
       // Préparer les données pour l'envoi API (sans les icônes, seulement la clé)
       const apiFormData = {
-        ...formData,
+        ...formDataWithFormattedPhone,
         category: getCategoryKey(formData.category)
       };
 
@@ -162,40 +212,8 @@ export default function BusinessCreation() {
     }
   };
 
-  // Calculate progress
-  const filledFields = [
-    formData.businessName,
-    formData.address,
-    formData.phone,
-    formData.category
-  ].filter(Boolean).length;
-  const progressPercent = (filledFields / 4) * 100;
-
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Back Button */}
-      <button
-        onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-primary hover:text-secondary mb-8 transition text-sm font-medium"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Retour
-      </button>
-
-      {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-xs font-semibold text-text">Étape 3/5</h2>
-          <span className="text-xs text-text-light">{filledFields}/4</span>
-        </div>
-        <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-          <div
-            className="h-full bg-success transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
-
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-text mb-2 leading-tight">
@@ -259,18 +277,33 @@ export default function BusinessCreation() {
           <div>
             <label className="block text-text font-semibold text-sm mb-1.5 flex items-center gap-2">
               Téléphone <span className="text-error">*</span>
-              {formData.phone && <CheckCircle2 className="w-4 h-4 text-success" />}
+              {formData.phone && !phoneError && <CheckCircle2 className="w-4 h-4 text-success" />}
             </label>
             <input
               type="tel"
               name="phone"
               value={formData.phone}
-              onChange={handleInputChange}
+              onChange={handlePhoneChange}
+              onBlur={handlePhoneBlur}
               disabled={loading}
-              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50 transition"
-              placeholder="Ex: 01 23 45 67 89"
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none disabled:bg-gray-50 transition ${
+                phoneError ? 'border-error focus:border-error' : 'border-border focus:border-primary'
+              }`}
+              placeholder="Ex: 0123456789"
               autoComplete="tel"
             />
+            {phoneError && (
+              <p className="text-xs text-error mt-1 flex items-start gap-1.5">
+                <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                {phoneError}
+              </p>
+            )}
+            {!phoneError && !formData.phone && (
+              <p className="text-xs text-text-light mt-1 flex items-start gap-1.5">
+                <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                Formats acceptés : 0123456789 ou +33 1 23 45 67 89
+              </p>
+            )}
           </div>
 
           {/* Category */}
@@ -312,6 +345,74 @@ export default function BusinessCreation() {
             />
           </div>
 
+          {/* Google Review Link (Optional) */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-text font-semibold text-xs">
+                Lien avis Google <span className="text-text-light">(optionnel)</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowGoogleHelp(!showGoogleHelp)}
+                className="flex items-center gap-1 text-xs text-primary hover:text-secondary transition font-medium"
+              >
+                <Info className="w-3.5 h-3.5" />
+                Comment trouver mon lien ?
+              </button>
+            </div>
+
+            {showGoogleHelp && (
+              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-text space-y-2">
+                <p className="font-semibold text-primary">Comment obtenir votre lien d'avis Google :</p>
+                <ol className="list-decimal list-inside space-y-1 ml-2">
+                  <li>Ouvrez <strong>Google Maps</strong> et recherchez votre établissement</li>
+                  <li>Cliquez sur le nom de votre établissement</li>
+                  <li>Faites défiler jusqu'à la section <strong>"Avis"</strong></li>
+                  <li>Cliquez sur <strong>"Partager un avis"</strong></li>
+                  <li>Copiez le lien qui apparaît (format : g.page/...)</li>
+                </ol>
+                <p className="text-text-light italic mt-2">
+                  💡 Astuce : Ce lien permettra à vos clients de laisser un avis en un clic !
+                </p>
+              </div>
+            )}
+
+            <input
+              type="url"
+              name="googleReviewLink"
+              value={formData.googleReviewLink}
+              onChange={handleInputChange}
+              disabled={loading}
+              className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:border-primary disabled:bg-gray-50 transition"
+              placeholder="https://g.page/votre-etablissement/review"
+              autoComplete="off"
+            />
+            {!formData.googleReviewLink && !showGoogleHelp && (
+              <p className="text-xs text-text-light mt-1 flex items-start gap-1.5">
+                <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                Permet à vos clients de laisser des avis facilement
+              </p>
+            )}
+          </div>
+
+          {/* Opening Hours (Optional) */}
+          <div>
+            <label className="block text-text font-semibold text-xs mb-1.5">
+              Horaires d'ouverture <span className="text-text-light">(optionnel)</span>
+            </label>
+            <OpeningHoursInput
+              value={formData.openingHours}
+              onChange={(hours) => setFormData(prev => ({ ...prev, openingHours: hours }))}
+              disabled={loading}
+            />
+            {!formData.openingHours && (
+              <p className="text-xs text-text-light mt-1 flex items-start gap-1.5">
+                <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                Par défaut : 9h-18h du lundi au vendredi
+              </p>
+            )}
+          </div>
+
           {/* Toast */}
           {toast && (
             <div
@@ -333,7 +434,7 @@ export default function BusinessCreation() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || authLoading || !formData.businessName || !formData.address || !formData.phone || !formData.category}
+            disabled={loading || authLoading || !formData.businessName || !formData.address || !formData.phone || !formData.category || phoneError !== ''}
             className="w-full px-6 py-2.5 bg-success hover:bg-opacity-90 disabled:bg-gray-300 text-white text-sm rounded-lg transition font-semibold disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
           >
             {authLoading ? (
@@ -346,15 +447,21 @@ export default function BusinessCreation() {
                 <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Enregistrement...
               </>
-            ) : progressPercent === 100 ? (
+            ) : (
               <>
                 <CheckCircle2 className="w-4 h-4" />
                 Créer mon commerce
               </>
-            ) : (
-              'Complétez tous les champs'
             )}
           </button>
+
+          {/* Info message */}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs text-text-light text-center">
+              <Info className="w-3.5 h-3.5 inline mr-1" />
+              Vous pourrez modifier toutes ces informations dans votre espace professionnel
+            </p>
+          </div>
         </form>
       </div>
 

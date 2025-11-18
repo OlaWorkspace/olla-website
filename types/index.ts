@@ -36,6 +36,7 @@ export interface BusinessData {
   website?: string | null;
   category: string;
   openingHours?: any;
+  googleReviewLink?: string | null;
 }
 
 export interface Toast {

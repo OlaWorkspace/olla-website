@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, AlertCircle, Gift, Lightbulb, Info } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Gift, Lightbulb, Info } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
@@ -197,29 +197,6 @@ export default function LoyaltySetup() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Back Button */}
-      <button
-        onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-primary hover:text-secondary mb-8 transition text-sm font-medium"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Retour
-      </button>
-
-      {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-xs font-semibold text-text">Étape 3/3</h2>
-          <span className="text-xs text-success font-semibold">{programs.length} programme{programs.length > 1 ? 's' : ''}</span>
-        </div>
-        <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-          <div
-            className="h-full bg-success transition-all duration-300"
-            style={{ width: programs.length > 0 ? '100%' : '0%' }}
-          />
-        </div>
-      </div>
-
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
@@ -393,6 +370,14 @@ export default function LoyaltySetup() {
             'Créez au moins un palier pour continuer'
           )}
         </button>
+
+        {/* Info message */}
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-xs text-text-light text-center">
+            <Info className="w-3.5 h-3.5 inline mr-1" />
+            Vous pourrez modifier toutes ces informations dans votre espace professionnel
+          </p>
+        </div>
       </form>
     </div>
   );
