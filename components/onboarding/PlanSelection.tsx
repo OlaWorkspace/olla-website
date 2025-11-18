@@ -10,6 +10,33 @@ import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import { setOnboardingStatus } from '@/lib/utils/onboarding';
 import type { Plan } from '@/types';
 
+// Helper function to check if promotion is active
+function isPromotionActive(plan: Plan): boolean {
+  if (!plan.promotion_enabled) return false;
+
+  const now = new Date();
+
+  // Check start date
+  if (plan.promotion_start_date) {
+    const startDate = new Date(plan.promotion_start_date);
+    if (now < startDate) return false;
+  }
+
+  // Check end date
+  if (plan.promotion_end_date) {
+    const endDate = new Date(plan.promotion_end_date);
+    if (now > endDate) return false;
+  }
+
+  // Check quantity limits
+  if (plan.promotion_quantity_limit !== null && plan.promotion_quantity_limit !== undefined) {
+    const used = plan.promotion_quantity_used || 0;
+    if (used >= plan.promotion_quantity_limit) return false;
+  }
+
+  return true;
+}
+
 export default function PlanSelection() {
   const router = useRouter();
   const { user, userProfile, loading: authLoading } = useAuth();
@@ -173,14 +200,14 @@ export default function PlanSelection() {
               }`}
             >
               {/* Recommended Badge */}
-              {isRecommended && !plan.promotion_enabled && (
+              {isRecommended && !isPromotionActive(plan) && (
                 <div className="absolute top-0 left-0 right-0 bg-success text-white text-center py-1.5 text-xs font-bold uppercase tracking-wide">
                   Recommandé
                 </div>
               )}
 
               {/* Promotion Badge */}
-              {plan.promotion_enabled && plan.promotion_label && (
+              {isPromotionActive(plan) && plan.promotion_label && (
                 <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center py-1.5 text-xs font-bold uppercase tracking-wide">
                   {plan.promotion_label}
                 </div>
@@ -193,7 +220,7 @@ export default function PlanSelection() {
                 </div>
               )}
 
-              <div className={`p-6 ${isRecommended || isComingSoon || plan.promotion_enabled ? 'pt-10' : ''} h-full flex flex-col`}>
+              <div className={`p-6 ${isRecommended || isComingSoon || isPromotionActive(plan) ? 'pt-10' : ''} h-full flex flex-col`}>
                 {/* Plan Header */}
                 <div className="mb-4">
                   <h3 className="text-xl font-bold text-text mb-1">
@@ -206,7 +233,7 @@ export default function PlanSelection() {
 
                 {/* Pricing */}
                 <div className="mb-6 pb-6 border-b border-border">
-                  {plan.promotion_enabled && plan.promotion_months_free && plan.promotion_months_free > 0 ? (
+                  {isPromotionActive(plan) && plan.promotion_months_free && plan.promotion_months_free > 0 ? (
                     <>
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold text-text">

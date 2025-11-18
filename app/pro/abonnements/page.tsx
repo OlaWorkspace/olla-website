@@ -28,6 +28,33 @@ interface SubscriptionStatus {
   currentSubscription: any | null;
 }
 
+// Helper function to check if promotion is active
+function isPromotionActive(plan: SubscriptionPlan): boolean {
+  if (!plan.promotion_enabled) return false;
+
+  const now = new Date();
+
+  // Check start date
+  if (plan.promotion_start_date) {
+    const startDate = new Date(plan.promotion_start_date);
+    if (now < startDate) return false;
+  }
+
+  // Check end date
+  if (plan.promotion_end_date) {
+    const endDate = new Date(plan.promotion_end_date);
+    if (now > endDate) return false;
+  }
+
+  // Check quantity limits
+  if (plan.promotion_quantity_limit !== null && plan.promotion_quantity_limit !== undefined) {
+    const used = plan.promotion_quantity_used || 0;
+    if (used >= plan.promotion_quantity_limit) return false;
+  }
+
+  return true;
+}
+
 /**
  * Page de gestion des abonnements
  * Utilise useAuth() et useEdgeFunction() pour gérer les subscriptions
@@ -189,12 +216,12 @@ export default function AbonnementsPage() {
             >
               {/* Header */}
               <div className="mb-4">
-                {plan.promotion_enabled && plan.promotion_label && (
+                {isPromotionActive(plan) && plan.promotion_label && (
                   <span className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-semibold px-2 py-1 rounded mb-2">
                     {plan.promotion_label}
                   </span>
                 )}
-                {isPremium && !isInactive && !plan.promotion_enabled && (
+                {isPremium && !isInactive && !isPromotionActive(plan) && (
                   <span className="inline-block bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded mb-2">
                     Recommandé
                   </span>
@@ -215,7 +242,7 @@ export default function AbonnementsPage() {
 
               {/* Price */}
               <div className="mb-6">
-                {plan.promotion_enabled && plan.promotion_months_free && plan.promotion_months_free > 0 ? (
+                {isPromotionActive(plan) && plan.promotion_months_free && plan.promotion_months_free > 0 ? (
                   <>
                     <div className="text-3xl font-bold text-slate-900">
                       0,00€
