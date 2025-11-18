@@ -53,7 +53,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-slate-100">
+    <div className="flex min-h-screen bg-slate-100">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -73,7 +73,7 @@ export default function AdminLayout({
 
       {/* Sidebar */}
       <aside
-        className={`w-64 bg-white shadow-lg fixed lg:static h-screen z-40 transition-transform duration-300 ease-in-out ${
+        className={`w-64 bg-white shadow-lg fixed left-0 top-0 h-screen z-40 transition-transform duration-300 ease-in-out overflow-y-auto ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -84,7 +84,7 @@ export default function AdminLayout({
           </p>
         </div>
 
-        <nav className="mt-6">
+        <nav className="mt-6 pb-6">
           <Link
             href="/admin"
             onClick={() => setIsOpen(false)}
@@ -114,7 +114,7 @@ export default function AdminLayout({
 
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 px-6 py-3 text-red-600 hover:bg-red-50 transition w-full mt-6"
+            className="flex items-center gap-3 px-6 py-3 text-red-600 hover:bg-red-50 transition w-full mt-6 text-left"
           >
             <LogOut className="w-5 h-5" />
             <span>Déconnexion</span>
@@ -123,7 +123,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
+      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</main>
     </div>
   );
 }

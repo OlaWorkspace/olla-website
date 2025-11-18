@@ -100,12 +100,12 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        className={`w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col z-40 transition-transform duration-300 ease-in-out overflow-y-auto ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         {/* User Info */}
-        <div className="p-6 border-b border-slate-700 mt-14 lg:mt-0">
+        <div className="p-5 border-b border-slate-700 mt-14 lg:mt-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
               {getInitials()}
@@ -118,8 +118,8 @@ export default function Sidebar() {
         </div>
 
         {/* Menu */}
-        <nav className="flex-1 overflow-y-auto py-8">
-          <ul className="space-y-2 px-4">
+        <nav className="flex-1 py-6">
+          <ul className="space-y-1 px-3">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || (item.href !== "/pro" && pathname.startsWith(item.href));
@@ -145,7 +145,7 @@ export default function Sidebar() {
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t border-slate-700">
+        <div className="p-3 border-t border-slate-700">
           <LogOutButton className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm" />
         </div>
       </aside>
