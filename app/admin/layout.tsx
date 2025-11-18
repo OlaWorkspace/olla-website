@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/clients/browser';
-import { Settings, Users, CreditCard, LogOut } from 'lucide-react';
+import { Settings, Users, CreditCard, LogOut, Menu, X } from 'lucide-react';
 
 /**
  * Layout protégé pour l'espace admin
@@ -18,6 +18,7 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const { user, userProfile, loading, isAdmin } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -53,9 +54,30 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen bg-slate-100">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white text-slate-900 rounded-lg shadow-lg hover:bg-slate-100 transition-colors"
+        aria-label="Toggle menu"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg">
-        <div className="p-6">
+      <aside
+        className={`w-64 bg-white shadow-lg fixed lg:static h-screen z-40 transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        <div className="p-6 mt-14 lg:mt-0">
           <h1 className="text-2xl font-bold text-slate-900">Admin Panel</h1>
           <p className="text-sm text-slate-500 mt-1">
             {userProfile?.user_firstname} {userProfile?.user_lastname}
@@ -65,6 +87,7 @@ export default function AdminLayout({
         <nav className="mt-6">
           <Link
             href="/admin"
+            onClick={() => setIsOpen(false)}
             className="flex items-center gap-3 px-6 py-3 text-slate-700 hover:bg-slate-100 transition"
           >
             <Settings className="w-5 h-5" />
@@ -73,6 +96,7 @@ export default function AdminLayout({
 
           <Link
             href="/admin/subscriptions"
+            onClick={() => setIsOpen(false)}
             className="flex items-center gap-3 px-6 py-3 text-slate-700 hover:bg-slate-100 transition"
           >
             <CreditCard className="w-5 h-5" />
@@ -81,6 +105,7 @@ export default function AdminLayout({
 
           <Link
             href="/admin/users"
+            onClick={() => setIsOpen(false)}
             className="flex items-center gap-3 px-6 py-3 text-slate-700 hover:bg-slate-100 transition"
           >
             <Users className="w-5 h-5" />
@@ -98,7 +123,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
     </div>
   );
 }

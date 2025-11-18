@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Settings, CreditCard, Users, HelpCircle, LifeBuoy } from "lucide-react";
+import { LayoutDashboard, Settings, CreditCard, Users, HelpCircle, LifeBuoy, Menu, X } from "lucide-react";
 import LogOutButton from "@/components/common/LogOutButton";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -46,6 +47,7 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { userProfile } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
   // Générer les initiales pour l'avatar
   const getInitials = () => {
@@ -78,50 +80,75 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col">
-      {/* User Info */}
-      <div className="p-6 border-b border-slate-700">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
-            {getInitials()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm truncate">{getFullName()}</p>
-            <p className="text-xs text-slate-400">Espace Pro</p>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-900 text-white rounded-lg shadow-lg hover:bg-slate-800 transition-colors"
+        aria-label="Toggle menu"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        {/* User Info */}
+        <div className="p-6 border-b border-slate-700 mt-14 lg:mt-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+              {getInitials()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm truncate">{getFullName()}</p>
+              <p className="text-xs text-slate-400">Espace Pro</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Menu */}
-      <nav className="flex-1 overflow-y-auto py-8">
-        <ul className="space-y-2 px-4">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href !== "/pro" && pathname.startsWith(item.href));
+        {/* Menu */}
+        <nav className="flex-1 overflow-y-auto py-8">
+          <ul className="space-y-2 px-4">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || (item.href !== "/pro" && pathname.startsWith(item.href));
 
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    isActive
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-300 hover:bg-slate-800"
-                  }`}
-                >
-                  <Icon size={20} />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-blue-600 text-white"
+                        : "text-slate-300 hover:bg-slate-800"
+                    }`}
+                  >
+                    <Icon size={20} />
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-      {/* Logout */}
-      <div className="p-4 border-t border-slate-700">
-        <LogOutButton className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm" />
-      </div>
-    </aside>
+        {/* Logout */}
+        <div className="p-4 border-t border-slate-700">
+          <LogOutButton className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white px-4 py-3 rounded-lg transition-all duration-200 font-medium text-sm" />
+        </div>
+      </aside>
+    </>
   );
 }

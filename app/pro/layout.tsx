@@ -50,8 +50,8 @@ export default function ProLayout({
       <Sidebar />
 
       {/* Main content */}
-      <main className="flex-1 ml-64 bg-slate-50 min-h-screen">
-        <div className="p-8">{children}</div>
+      <main className="flex-1 ml-0 lg:ml-64 bg-slate-50 min-h-screen">
+        <div className="p-4 md:p-8">{children}</div>
       </main>
     </div>
   );
