@@ -66,9 +66,22 @@ export const useOnboardingGuard = (): UseOnboardingGuardReturn => {
       // Get current onboarding status from localStorage
       let currentStatus = getOnboardingStatus();
 
-      // Sync with database if available
+      // Sync with database if available, but prefer localStorage if it's more advanced
+      // This prevents race conditions where DB hasn't been updated yet
       if (userProfile?.onboarding_status !== undefined) {
-        currentStatus = userProfile.onboarding_status as OnboardingStatus;
+        const dbStatus = userProfile.onboarding_status as OnboardingStatus;
+        const steps: (OnboardingStatus | 'completed')[] = [
+          null,
+          'plan_selected',
+          'business_info',
+          'loyalty_setup',
+          'completed'
+        ];
+        const localIndex = steps.indexOf(currentStatus);
+        const dbIndex = steps.indexOf(dbStatus);
+
+        // Use the more advanced status (higher in the flow)
+        currentStatus = dbIndex > localIndex ? dbStatus : currentStatus;
       }
 
       // Check if user needs to be redirected
