@@ -3,11 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  getOnboardingStatus,
-  getRedirectPath,
-  OnboardingStatus,
-} from '@/lib/utils/onboarding';
+import { getOnboardingStatus, getRedirectPath } from '@/lib/utils/onboarding';
+import { OnboardingStatus } from '@/types';
 
 interface UseOnboardingGuardReturn {
   isChecking: boolean;
