@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/clients/browser";
+import { useEdgeFunction } from "@/lib/supabase/hooks/useEdgeFunction";
 import { Search, ChevronRight, Building2, Plus, MapPin, User } from "lucide-react";
 import { BUSINESS_CATEGORIES } from "@/lib/constants";
 
@@ -20,11 +20,13 @@ interface Business {
 type SortType = "newest" | "oldest" | "name";
 
 export default function BusinessesAdminPage() {
+  const { callFunction } = useEdgeFunction();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [filteredBusinesses, setFilteredBusinesses] = useState<Business[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortType, setSortType] = useState<SortType>("newest");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBusinesses();
@@ -37,15 +39,18 @@ export default function BusinessesAdminPage() {
   const fetchBusinesses = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("businesses")
-        .select("*, users(user_firstname, user_lastname)")
-        .order("created_at", { ascending: false });
+      setError(null);
+      const { data, error: fetchError } = await callFunction("admin-get-businesses", {});
 
-      if (error) throw error;
-      setBusinesses(data || []);
-    } catch (error) {
-      console.error("Error fetching businesses:", error);
+      if (fetchError) {
+        throw new Error(fetchError);
+      }
+
+      setBusinesses(data?.businesses || []);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error fetching businesses";
+      console.error("Error fetching businesses:", errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -114,6 +119,13 @@ export default function BusinessesAdminPage() {
           Nouveau commerce
         </Link>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
 
       {/* Search and Filter Bar */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">

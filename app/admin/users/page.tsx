@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/clients/browser";
-import { Search, ChevronRight, Users, Shield, Briefcase } from "lucide-react";
+import { useEdgeFunction } from "@/lib/supabase/hooks/useEdgeFunction";
+import { Search, ChevronRight, Users } from "lucide-react";
 
 interface User {
   id: string;
@@ -18,11 +18,13 @@ interface User {
 type FilterType = "all" | "pro" | "client" | "admin";
 
 export default function UsersAdminPage() {
+  const { callFunction } = useEdgeFunction();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -35,15 +37,21 @@ export default function UsersAdminPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .order("created_at", { ascending: false });
+      setError(null);
+      const { data, error: fetchError } = await callFunction("admin-get-users", {
+        search: "",
+        filter: "all",
+      });
 
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+      if (fetchError) {
+        throw new Error(fetchError);
+      }
+
+      setUsers(data?.users || []);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error fetching users";
+      console.error("Error fetching users:", errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -143,6 +151,13 @@ export default function UsersAdminPage() {
           ))}
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
 
       {/* Users Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">

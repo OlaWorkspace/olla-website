@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/clients/browser";
+import { useEdgeFunction } from "@/lib/supabase/hooks/useEdgeFunction";
 import { Users, CreditCard, Building2, TrendingUp, Plus, ChevronRight } from "lucide-react";
 
 interface Stats {
@@ -24,6 +24,7 @@ interface RecentUser {
 }
 
 export default function AdminDashboard() {
+  const { callFunction } = useEdgeFunction();
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     proUsers: 0,
@@ -38,29 +39,25 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch all stats in parallel
-        const [usersResult, proUsersResult, adminUsersResult, subscriptionsResult, businessesResult, activeBusinessesResult, recentUsersResult] =
-          await Promise.all([
-            supabase.from("users").select("id", { count: "exact", head: true }),
-            supabase.from("users").select("id", { count: "exact", head: true }).eq("pro", true),
-            supabase.from("users").select("id", { count: "exact", head: true }).eq("admin", true),
-            supabase.from("user_subscriptions").select("id", { count: "exact", head: true }),
-            supabase.from("businesses").select("id", { count: "exact", head: true }),
-            supabase.from("businesses").select("id", { count: "exact", head: true }).eq("active", true),
-            supabase.from("users").select("id,user_firstname,user_lastname,user_email,pro,created_at").order("created_at", { ascending: false }).limit(5),
-          ]);
+        const { data, error } = await callFunction("admin-get-stats", {});
 
-        setStats({
-          totalUsers: usersResult.count || 0,
-          proUsers: proUsersResult.count || 0,
-          adminUsers: adminUsersResult.count || 0,
-          totalSubscriptions: subscriptionsResult.count || 0,
-          totalBusinesses: businessesResult.count || 0,
-          activeBusinesses: activeBusinessesResult.count || 0,
-        });
+        if (error) {
+          throw new Error(error);
+        }
 
-        if (recentUsersResult.data) {
-          setRecentUsers(recentUsersResult.data);
+        if (data) {
+          setStats({
+            totalUsers: data.totalUsers || 0,
+            proUsers: data.proUsers || 0,
+            adminUsers: data.adminUsers || 0,
+            totalSubscriptions: data.totalSubscriptions || 0,
+            totalBusinesses: data.totalBusinesses || 0,
+            activeBusinesses: data.activeBusinesses || 0,
+          });
+
+          if (data.recentUsers) {
+            setRecentUsers(data.recentUsers);
+          }
         }
       } catch (error) {
         console.error("Error fetching stats:", error);
@@ -70,7 +67,7 @@ export default function AdminDashboard() {
     };
 
     fetchStats();
-  }, []);
+  }, [callFunction]);
 
   if (loading) {
     return (

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { supabase } from "@/lib/supabase/clients/browser";
+import { useEdgeFunction } from "@/lib/supabase/hooks/useEdgeFunction";
 import { ArrowLeft, Shield, TrendingUp, TrendingDown, Mail, CalendarDays, User, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -22,10 +22,12 @@ export default function UserDetailPage() {
   const router = useRouter();
   const params = useParams();
   const userId = params.id as string;
+  const { callFunction } = useEdgeFunction();
 
   const [user, setUser] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUser();
@@ -34,16 +36,22 @@ export default function UserDetailPage() {
   const fetchUser = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", userId)
-        .single();
+      setError(null);
+      const { data, error: fetchError } = await callFunction("admin-get-user", {
+        userId,
+      });
 
-      if (error) throw error;
-      setUser(data);
-    } catch (error) {
-      console.error("Error fetching user:", error);
+      if (fetchError) {
+        throw new Error(fetchError);
+      }
+
+      if (data?.user) {
+        setUser(data.user);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error fetching user";
+      console.error("Error fetching user:", errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -124,10 +132,22 @@ export default function UserDetailPage() {
     );
   }
 
-  if (!user) {
+  if (!user && !error) {
     return (
       <div className="text-center py-12">
         <p className="text-slate-600">Utilisateur non trouvé</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
+        <p className="text-red-600 font-medium mb-4">{error}</p>
+        <Link href="/admin/users" className="text-blue-600 hover:underline">
+          Retour à la liste des utilisateurs
+        </Link>
       </div>
     );
   }
