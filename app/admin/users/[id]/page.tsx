@@ -37,16 +37,23 @@ export default function UserDetailPage() {
     try {
       setLoading(true);
       setError(null);
-      const { data, error: fetchError } = await callFunction("admin-get-user", {
-        userId,
+      // Use admin-get-users and filter locally to get a single user
+      const { data, error: fetchError } = await callFunction("admin-get-users", {
+        search: "",
+        filter: "all",
       });
 
       if (fetchError) {
         throw new Error(fetchError);
       }
 
-      if (data?.user) {
-        setUser(data.user);
+      const users = data?.users || [];
+      const targetUser = users.find((u: any) => u.id === userId);
+
+      if (targetUser) {
+        setUser(targetUser);
+      } else {
+        setError("Utilisateur non trouvé");
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error fetching user";
@@ -64,15 +71,11 @@ export default function UserDetailPage() {
 
     try {
       setActionLoading(true);
-      const response = await fetch("/api/admin/users/promote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+      const { data, error } = await callFunction("admin-promote-user", {
+        targetUserId: user.id,
       });
 
-      const result = await response.json();
-
-      if (!response.ok) throw new Error(result.error);
+      if (error) throw new Error(error);
 
       alert("Utilisateur promu avec succès!");
       fetchUser();
@@ -91,15 +94,12 @@ export default function UserDetailPage() {
 
     try {
       setActionLoading(true);
-      const response = await fetch("/api/admin/users/demote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+      const { data, error } = await callFunction("admin-demote-user", {
+        targetUserId: user.id,
+        keepBusiness: true,
       });
 
-      const result = await response.json();
-
-      if (!response.ok) throw new Error(result.error);
+      if (error) throw new Error(error);
 
       alert("Utilisateur rétrogradé avec succès!");
       fetchUser();

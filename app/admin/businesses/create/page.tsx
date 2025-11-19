@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/clients/browser";
+import { useEdgeFunction } from "@/lib/supabase/hooks/useEdgeFunction";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { CATEGORY_OPTIONS } from "@/lib/constants";
 
@@ -26,6 +26,7 @@ interface User {
 
 export default function CreateBusinessPage() {
   const router = useRouter();
+  const { callFunction } = useEdgeFunction();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -46,16 +47,18 @@ export default function CreateBusinessPage() {
   const fetchProfessionalUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("users")
-        .select("id, user_firstname, user_lastname, user_email")
-        .eq("pro", true)
-        .order("user_firstname");
+      const { data, error } = await callFunction("admin-get-users", {
+        search: "",
+        filter: "pro",
+      });
 
-      if (error) throw error;
-      setUsers(data || []);
+      if (error) throw new Error(error);
+
+      const proUsers = data?.users || [];
+      setUsers(proUsers);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching professional users:", error);
+      alert("Erreur lors du chargement des utilisateurs");
     } finally {
       setLoading(false);
     }
@@ -81,19 +84,17 @@ export default function CreateBusinessPage() {
 
     try {
       setSubmitting(true);
-      const { error } = await supabase.from("businesses").insert([
-        {
+      const { data, error } = await callFunction("admin-create-business", {
+        businessData: {
           business_name: formData.business_name,
           category: formData.category,
-          address: formData.address || null,
-          phone: formData.phone || null,
+          formatted_address: formData.address || null,
+          formatted_phone_number: formData.phone || null,
           website: formData.website || null,
-          user_id: formData.user_id,
-          active: formData.active,
         },
-      ]);
+      });
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       alert("Commerce créé avec succès!");
       router.push("/admin/businesses");
