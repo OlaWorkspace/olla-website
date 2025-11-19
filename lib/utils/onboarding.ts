@@ -3,12 +3,7 @@
  * Uses localStorage for client-side persistence
  */
 
-export type OnboardingStatus =
-  | null
-  | 'plan_selected'
-  | 'business_info'
-  | 'loyalty_setup'
-  | 'completed';
+import { OnboardingStatus } from '@/types';
 
 const ONBOARDING_STATUS_KEY = 'olla_onboarding_status';
 

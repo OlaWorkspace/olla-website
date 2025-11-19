@@ -1,5 +1,12 @@
 // Types globaux pour l'application Olla
 
+export type OnboardingStatus =
+  | null
+  | 'plan_selected'
+  | 'business_info'
+  | 'loyalty_setup'
+  | 'completed';
+
 export interface User {
   id: string;
   user_firstname: string;
@@ -8,6 +15,7 @@ export interface User {
   pro: boolean;
   admin: boolean;
   auth_id: string | null;
+  onboarding_status?: OnboardingStatus;
 }
 
 export interface Plan {

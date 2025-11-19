@@ -7,7 +7,8 @@ import { ArrowLeft, LogIn, UserPlus, Mail, Lock } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { supabase } from "@/lib/supabase/clients/browser";
-import { getOnboardingPath, setOnboardingStatus, OnboardingStatus } from "@/lib/utils/onboarding";
+import { getOnboardingPath, setOnboardingStatus } from "@/lib/utils/onboarding";
+import { OnboardingStatus } from "@/types";
 
 export default function LoginPage() {
   const router = useRouter();
