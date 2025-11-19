@@ -100,8 +100,8 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`w-64 bg-slate-900 text-white h-screen fixed left-0 top-0 flex flex-col z-40 transition-transform duration-300 ease-in-out overflow-y-auto ${
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        className={`w-64 bg-slate-900 text-white min-h-screen fixed right-0 lg:left-0 lg:right-auto top-0 flex flex-col z-40 transition-transform duration-300 ease-in-out overflow-y-auto ${
+          isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         }`}
       >
         {/* User Info */}

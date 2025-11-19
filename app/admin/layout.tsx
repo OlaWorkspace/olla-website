@@ -73,8 +73,8 @@ export default function AdminLayout({
 
       {/* Sidebar */}
       <aside
-        className={`w-64 bg-white shadow-lg fixed left-0 top-0 h-screen z-40 transition-transform duration-300 ease-in-out overflow-y-auto ${
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        className={`w-64 bg-white shadow-lg fixed right-0 lg:left-0 lg:right-auto top-0 min-h-screen z-40 transition-transform duration-300 ease-in-out overflow-y-auto ${
+          isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         }`}
       >
         <div className="p-6 mt-14 lg:mt-0">
