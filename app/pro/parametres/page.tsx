@@ -141,7 +141,7 @@ export default function ParametresPage() {
       // Préparer les données pour l'envoi API (convertir la catégorie en clé sans icône)
       const updatesWithCleanCategory = {
         ...businessForm,
-        category: getCategoryKey(businessForm.category)
+        category: getCategoryKey(businessForm.category || '')
       };
 
       const { data: updateData, error: updateError } = await callFunction(
