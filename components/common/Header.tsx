@@ -6,7 +6,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getOnboardingPath, setOnboardingStatus, OnboardingStatus } from "@/lib/utils/onboarding";
+import { getOnboardingPath, setOnboardingStatus } from "@/lib/utils/onboarding";
+import { OnboardingStatus } from "@/types";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
