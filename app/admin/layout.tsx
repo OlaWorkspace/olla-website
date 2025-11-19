@@ -57,7 +57,7 @@ export default function AdminLayout({
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white text-slate-900 rounded-lg shadow-lg hover:bg-slate-100 transition-colors"
+        className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-white text-slate-900 rounded-lg shadow-lg hover:bg-slate-100 transition-colors"
         aria-label="Toggle menu"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
