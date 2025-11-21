@@ -44,20 +44,13 @@ export default function AdminLayout({
     router.push('/auth/login');
   };
 
-  // Afficher un écran de chargement pendant la vérification
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-slate-200 rounded-full border-t-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Vérification des droits admin...</p>
-        </div>
-      </div>
-    );
+  // Si pas admin/pas connecté: afficher rien (redirection en background)
+  if (!loading && (!user || !isAdmin)) {
+    return null;
   }
 
-  // Ne rien afficher si l'utilisateur n'est pas admin
-  if (!user || !isAdmin) {
+  // Pendant le loading, afficher une page blanche (loading ultra rapide grâce au cache)
+  if (loading) {
     return null;
   }
 

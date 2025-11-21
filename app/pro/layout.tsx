@@ -27,20 +27,13 @@ export default function ProLayout({
     }
   }, [user, userProfile, loading, router]);
 
-  // Afficher un écran de chargement pendant la vérification
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-slate-200 rounded-full border-t-primary animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Chargement...</p>
-        </div>
-      </div>
-    );
+  // Si pas pro/pas connecté: afficher rien (redirection en background)
+  if (!loading && (!user || !userProfile?.pro)) {
+    return null;
   }
 
-  // Ne rien afficher si l'utilisateur n'est pas autorisé
-  if (!user || !userProfile?.pro) {
+  // Pendant le loading, afficher une page blanche (loading ultra rapide grâce au cache)
+  if (loading) {
     return null;
   }
 
@@ -51,7 +44,9 @@ export default function ProLayout({
 
       {/* Main content */}
       <main className="flex-1 ml-0 lg:ml-64 bg-slate-50">
-        <div className="p-4 md:p-6 lg:p-8 max-w-7xl">{children}</div>
+        <div className="p-4 md:p-6 lg:p-8 max-w-7xl">
+          {children}
+        </div>
       </main>
     </div>
   );

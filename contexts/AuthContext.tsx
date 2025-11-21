@@ -16,6 +16,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isPro: boolean;
   isAdmin: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,6 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Cache keys
+  const PROFILE_CACHE_KEY = 'olla_user_profile';
+  const PROFILE_TIMESTAMP_KEY = 'olla_user_profile_timestamp';
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
   useEffect(() => {
     let initialLoadComplete = false;
 
@@ -47,6 +53,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loadUserProfile(session.user.id);
       } else {
         console.log('⚠️ No initial session found');
+        // Clear cache on logout
+        localStorage.removeItem(PROFILE_CACHE_KEY);
+        localStorage.removeItem(PROFILE_TIMESTAMP_KEY);
         setLoading(false);
       }
       initialLoadComplete = true;
@@ -76,6 +85,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await loadUserProfile(session.user.id);
         } else {
           setUserProfile(null);
+          // Clear cache on logout
+          localStorage.removeItem(PROFILE_CACHE_KEY);
+          localStorage.removeItem(PROFILE_TIMESTAMP_KEY);
           setLoading(false);
         }
       }
@@ -85,11 +97,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   /**
-   * Charge le profil utilisateur depuis la table 'users'
+   * Charge le profil utilisateur depuis cache ou Supabase
    */
   const loadUserProfile = async (userId: string) => {
     try {
-      console.log('📥 Loading user profile for:', userId);
+      // 1. Check cache first
+      const cachedProfile = localStorage.getItem(PROFILE_CACHE_KEY);
+      const cachedTimestamp = localStorage.getItem(PROFILE_TIMESTAMP_KEY);
+
+      if (cachedProfile && cachedTimestamp) {
+        const age = Date.now() - parseInt(cachedTimestamp);
+        if (age < CACHE_DURATION) {
+          console.log('⚡ Using cached profile (age:', Math.round(age / 1000), 's)');
+          const profile = JSON.parse(cachedProfile);
+          setUserProfile(profile);
+          setError(null);
+          setLoading(false);
+
+          // Refresh in background if cache is older than 1 minute
+          if (age > 60 * 1000) {
+            console.log('🔄 Refreshing profile in background...');
+            refreshProfileInBackground(userId);
+          }
+          return;
+        }
+      }
+
+      // 2. No valid cache, load from database
+      console.log('📥 Loading user profile from database for:', userId);
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -104,6 +139,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('✅ User profile loaded:', data?.pro ? 'Pro' : 'User', data?.admin ? '(Admin)' : '');
+
+      // Save to cache
+      localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(data));
+      localStorage.setItem(PROFILE_TIMESTAMP_KEY, Date.now().toString());
+
       setUserProfile(data);
       setError(null);
     } catch (err) {
@@ -112,6 +152,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUserProfile(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Refresh profile in background without blocking UI
+   */
+  const refreshProfileInBackground = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_id', userId)
+        .single();
+
+      if (!error && data) {
+        localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(data));
+        localStorage.setItem(PROFILE_TIMESTAMP_KEY, Date.now().toString());
+        setUserProfile(data);
+      }
+    } catch (err) {
+      console.error('⚠️ Background refresh failed:', err);
+    }
+  };
+
+  /**
+   * Public function to refresh profile (call after creating/updating data)
+   */
+  const refreshProfile = async () => {
+    if (user) {
+      console.log('🔄 Manual profile refresh requested');
+      // Invalidate cache
+      localStorage.removeItem(PROFILE_CACHE_KEY);
+      localStorage.removeItem(PROFILE_TIMESTAMP_KEY);
+      // Reload profile
+      await loadUserProfile(user.id);
     }
   };
 
@@ -125,6 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         isPro: userProfile?.pro || false,
         isAdmin: userProfile?.admin || false,
+        refreshProfile,
       }}
     >
       {children}
