@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, LogIn, UserPlus, Mail, Lock } from "lucide-react";
@@ -11,7 +11,7 @@ import { getOnboardingPath, setOnboardingStatus } from "@/lib/utils/onboarding";
 import { useEdgeFunction } from "@/lib/supabase/hooks/useEdgeFunction";
 import { OnboardingStatus } from "@/types";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get('token');
@@ -417,5 +417,24 @@ export default function LoginPage() {
 
       <Footer />
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <>
+        <Header />
+        <main className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-12">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-border rounded-full border-t-primary animate-spin mx-auto mb-4" />
+            <p className="text-text-light">Chargement...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
