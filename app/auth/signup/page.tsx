@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { UserPlus, Mail, Lock, User, CheckCircle2, CreditCard, Building2, Gift } from "lucide-react";
@@ -26,7 +26,7 @@ interface FormErrors {
   confirmPassword?: string;
 }
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get('token');
@@ -562,5 +562,24 @@ export default function SignupPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <>
+        <Header />
+        <main className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-12">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-border rounded-full border-t-primary animate-spin mx-auto mb-4" />
+            <p className="text-text-light">Chargement...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    }>
+      <SignupContent />
+    </Suspense>
   );
 }
