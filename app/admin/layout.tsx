@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase/clients/browser';
+import { useLogout } from '@/lib/hooks/useLogout';
 import { LayoutDashboard, Users, Building2, CreditCard, LogOut, Menu, X, BarChart3 } from 'lucide-react';
 
 const menuItems = [
@@ -27,6 +27,7 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { user, userProfile, loading, isAdmin } = useAuth();
+  const { logout } = useLogout();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -40,8 +41,11 @@ export default function AdminLayout({
   }, [user, isAdmin, loading, router]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push('/auth/login');
+    try {
+      await logout();
+    } catch (error) {
+      // Erreur déjà loggée dans le hook
+    }
   };
 
   // Si pas admin/pas connecté: afficher rien (redirection en background)
