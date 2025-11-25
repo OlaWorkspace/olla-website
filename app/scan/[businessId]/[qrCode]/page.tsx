@@ -49,9 +49,9 @@ export default function ScanFallbackPage() {
 
   useEffect(() => {
     // 🔍 DEBUG: Log des paramètres reçus
-    console.log('🔍 WEB DEBUG - businessId reçu:', businessId);
-    console.log('🔍 WEB DEBUG - qrCode reçu:', qrCode);
-    console.log('🔍 WEB DEBUG - params complets:', params);
+    
+    
+    
 
     // Détecter la plateforme
     const userAgent = navigator.userAgent || navigator.vendor;
@@ -66,8 +66,8 @@ export default function ScanFallbackPage() {
     const universalLink = `https://ollafidelite.com/scan/${businessId}/${qrCode}`;
 
     // 🔍 DEBUG: Log des liens générés
-    console.log('🔍 WEB DEBUG - deepLink généré:', deepLink);
-    console.log('🔍 WEB DEBUG - universalLink généré:', universalLink);
+    
+    
 
     // Essayer d'ouvrir l'app (timeout de 1.5s)
     const timeout = setTimeout(() => {
@@ -110,9 +110,9 @@ export default function ScanFallbackPage() {
         <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
           {/* Logo */}
           <div className="mb-8 flex justify-center">
-            <div className="relative w-24 h-24">
+            <div className="relative w-24 h-24 rounded-xl overflow-hidden">
               <Image
-                src="/logo-fond-bleu.png"
+                src="/icon.svg"
                 alt="OLLA Logo"
                 fill
                 className="object-contain"

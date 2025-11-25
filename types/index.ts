@@ -16,6 +16,7 @@ export interface User {
   admin: boolean;
   auth_id: string | null;
   onboarding_status?: OnboardingStatus;
+  default_business_id?: string | null;
 }
 
 export interface Plan {

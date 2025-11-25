@@ -2,16 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, LogIn, UserPlus, Mail, Lock } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { supabase } from "@/lib/supabase/clients/browser";
 import { getOnboardingPath, setOnboardingStatus } from "@/lib/utils/onboarding";
+import { useEdgeFunction } from "@/lib/supabase/hooks/useEdgeFunction";
 import { OnboardingStatus } from "@/types";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const invitationToken = searchParams.get('token');
+  const { callFunction } = useEdgeFunction();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -87,8 +92,50 @@ export default function LoginPage() {
       if (signInError) throw signInError;
       if (!data.user) throw new Error('No user returned');
 
-      console.log("✅ Connecté:", data.user.email);
 
+      // Si un token d'invitation est présent
+      if (invitationToken) {
+        try {
+
+          // Récupérer le record users
+          const { data: userRecord, error: userError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_id', data.user.id)
+            .single();
+
+          if (userError || !userRecord) {
+            throw new Error('Impossible de récupérer le profil utilisateur');
+          }
+
+          const { data: acceptData, error: acceptError } = await callFunction(
+            'accept-staff-invitation',
+            {
+              token: invitationToken,
+              userId: userRecord.id,
+              authId: data.user.id,
+            }
+          );
+
+          if (acceptError) {
+            throw new Error(acceptError);
+          }
+
+          if (acceptData?.data?.businessId) {
+            // Sync onboarding status to localStorage for staff members
+            setOnboardingStatus('completed');
+            router.push(`/pro/dashboard?businessId=${acceptData.data.businessId}`);
+            return;
+          }
+        } catch (inviteErr) {
+          console.error('❌ Error accepting invitation:', inviteErr);
+          setError(inviteErr instanceof Error ? inviteErr.message : 'Erreur lors de l\'acceptation de l\'invitation');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Flux normal (sans token d'invitation)
       // Vérifier le rôle de l'utilisateur
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -253,7 +300,7 @@ export default function LoginPage() {
 
             {/* Sign up CTA */}
             <Link
-              href="/auth/signup"
+              href={invitationToken ? `/auth/signup?token=${invitationToken}` : "/auth/signup"}
               className="w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 lg:gap-3 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-gray-50 text-gray-900 border-2 border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl font-semibold text-xs sm:text-sm lg:text-base hover:bg-gray-100 hover:border-primary hover:text-primary transition-all duration-300"
             >
               <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />

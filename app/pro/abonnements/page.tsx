@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 
@@ -58,15 +59,24 @@ function isPromotionActive(plan: SubscriptionPlan): boolean {
 /**
  * Page de gestion des abonnements
  * Utilise useAuth() et useEdgeFunction() pour gérer les subscriptions
+ * Accès: OWNER uniquement
  */
 export default function AbonnementsPage() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, userRole, loading: authLoading } = useAuth();
   const { callFunction } = useEdgeFunction();
+  const router = useRouter();
 
   const [data, setData] = useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
+
+  // Vérifier l'accès - seuls OWNER peuvent accéder
+  useEffect(() => {
+    if (!authLoading && userRole && userRole !== 'OWNER') {
+      router.push('/pro');
+    }
+  }, [userRole, authLoading, router]);
 
   useEffect(() => {
     const fetchSubscriptions = async () => {

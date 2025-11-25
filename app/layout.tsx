@@ -8,6 +8,15 @@ export const metadata: Metadata = {
   description:
     "Un seul système pour tous vos commerces : NFC, QR, avis Google et récompenses.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.ollafidelite.com"),
+  icons: {
+    icon: [
+      {
+        url: "/favicon.svg?v=2",
+        type: "image/svg+xml",
+      }
+    ],
+    apple: "/favicon.svg?v=2",
+  },
   openGraph: {
     title: "Olla — La fidélité sans carte",
     description:
@@ -18,7 +27,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/logo-fond-bleu.png",
+        url: "/icon.svg",
         width: 1200,
         height: 630,
         alt: "Olla - La fidélité sans carte",
@@ -29,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Olla — La fidélité sans carte",
     description: "Un seul système pour tous vos commerces : NFC, QR, avis Google et récompenses.",
-    images: ["/logo-fond-bleu.png"],
+    images: ["/icon.svg"],
   },
 };
 

@@ -1,11 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/clients/browser';
-import { Settings, Users, CreditCard, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, Building2, CreditCard, LogOut, Menu, X, BarChart3 } from 'lucide-react';
+
+const menuItems = [
+  { label: 'Tableau de bord', href: '/admin', icon: LayoutDashboard },
+  { label: 'Utilisateurs', href: '/admin/users', icon: Users },
+  { label: 'Commerces', href: '/admin/businesses', icon: Building2 },
+  { label: 'Abonnements', href: '/admin/subscriptions', icon: CreditCard },
+  { label: 'Statistiques', href: '/admin/stats', icon: BarChart3 },
+];
 
 /**
  * Layout protégé pour l'espace admin
@@ -17,6 +25,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, userProfile, loading, isAdmin } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -35,25 +44,18 @@ export default function AdminLayout({
     router.push('/auth/login');
   };
 
-  // Afficher un écran de chargement pendant la vérification
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-slate-200 rounded-full border-t-primary animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Chargement...</p>
-        </div>
-      </div>
-    );
+  // Si pas admin/pas connecté: afficher rien (redirection en background)
+  if (!loading && (!user || !isAdmin)) {
+    return null;
   }
 
-  // Ne rien afficher si l'utilisateur n'est pas admin
-  if (!user || !isAdmin) {
+  // Pendant le loading, afficher une page blanche (loading ultra rapide grâce au cache)
+  if (loading) {
     return null;
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="flex min-h-screen bg-slate-50">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -73,57 +75,62 @@ export default function AdminLayout({
 
       {/* Sidebar */}
       <aside
-        className={`w-64 bg-white shadow-lg fixed right-0 lg:left-0 lg:right-auto top-0 min-h-screen z-40 transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`w-64 bg-slate-900 text-white shadow-lg fixed right-0 lg:left-0 lg:right-auto top-0 min-h-screen z-40 transition-transform duration-300 ease-in-out overflow-y-auto ${
           isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="p-6 mt-14 lg:mt-0">
-          <h1 className="text-2xl font-bold text-slate-900">Admin Panel</h1>
-          <p className="text-sm text-slate-500 mt-1">
+        {/* Header */}
+        <div className="p-6 border-b border-slate-700 mt-14 lg:mt-0">
+          <h1 className="text-2xl font-bold">Olla Admin</h1>
+          <p className="text-sm text-slate-400 mt-2">
             {userProfile?.user_firstname} {userProfile?.user_lastname}
           </p>
+          <p className="text-xs text-slate-500 mt-1">Administrateur</p>
         </div>
 
-        <nav className="mt-6 pb-6">
-          <Link
-            href="/admin"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-6 py-3 text-slate-700 hover:bg-slate-100 transition"
-          >
-            <Settings className="w-5 h-5" />
-            <span>Dashboard</span>
-          </Link>
+        {/* Navigation */}
+        <nav className="py-6 px-3">
+          <ul className="space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
 
-          <Link
-            href="/admin/subscriptions"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-6 py-3 text-slate-700 hover:bg-slate-100 transition"
-          >
-            <CreditCard className="w-5 h-5" />
-            <span>Subscriptions</span>
-          </Link>
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-blue-600 text-white font-semibold"
+                        : "text-slate-300 hover:bg-slate-800"
+                    }`}
+                  >
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-          <Link
-            href="/admin/users"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-6 py-3 text-slate-700 hover:bg-slate-100 transition"
-          >
-            <Users className="w-5 h-5" />
-            <span>Utilisateurs</span>
-          </Link>
-
+        {/* Footer */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-slate-700 bg-slate-900">
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 px-6 py-3 text-red-600 hover:bg-red-50 transition w-full mt-6 text-left"
+            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg transition font-semibold text-sm"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut size={18} />
             <span>Déconnexion</span>
           </button>
-        </nav>
+        </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</main>
+      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto p-4 md:p-6 lg:p-8 pb-20 lg:pb-8">
+        {children}
+      </main>
     </div>
   );
 }

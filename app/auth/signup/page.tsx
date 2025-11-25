@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserPlus, Mail, Lock, User, CheckCircle2, CreditCard, Building2, Gift } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { supabase } from "@/lib/supabase/clients/browser";
-import { getOnboardingStatus, getOnboardingPath } from "@/lib/utils/onboarding";
+import { useEdgeFunction } from "@/lib/supabase/hooks/useEdgeFunction";
+import { getOnboardingStatus, getOnboardingPath, setOnboardingStatus } from "@/lib/utils/onboarding";
 
 interface FormData {
   firstName: string;
@@ -27,6 +28,9 @@ interface FormErrors {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const invitationToken = searchParams.get('token');
+  const { callFunction } = useEdgeFunction();
 
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -88,18 +92,25 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      // Inscription directe côté client via localStorage
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // Déterminer si on crée un compte pro ou normal selon la présence du token
+      const signUpData: any = {
         email: formData.email,
         password: formData.password,
         options: {
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
-            pro: true,
           },
         },
-      });
+      };
+
+      // Si pas de token, on crée un compte pro
+      if (!invitationToken) {
+        signUpData.options.data.pro = true;
+      }
+
+      // Inscription directe côté client via localStorage
+      const { data, error: signUpError } = await supabase.auth.signUp(signUpData);
 
       if (signUpError) {
         console.error('❌ Signup error:', signUpError);
@@ -118,7 +129,6 @@ export default function SignupPage() {
         return;
       }
 
-      console.log('✅ Inscription réussie:', data.user.email);
 
       // Connexion immédiate avec les identifiants (si email confirmation n'est pas requise)
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -127,7 +137,6 @@ export default function SignupPage() {
       });
 
       if (signInError) {
-        console.log('⚠️ Auto sign-in failed (email confirmation may be required):', signInError);
         // Si la confirmation email est requise, rediriger vers une page d'information
         setErrors(prev => ({
           ...prev,
@@ -137,11 +146,59 @@ export default function SignupPage() {
         return;
       }
 
+      // Si un token d'invitation est présent
+      if (invitationToken) {
+        try {
+
+          // Attendre que le record users soit créé en base (trigger)
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          // Récupérer le record users créé par le trigger
+          const { data: userRecord, error: userError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_id', data.user.id)
+            .single();
+
+          if (userError || !userRecord) {
+            throw new Error('Impossible de récupérer le profil utilisateur');
+          }
+
+          const { data: acceptData, error: acceptError } = await callFunction(
+            'accept-staff-invitation',
+            {
+              token: invitationToken,
+              userId: userRecord.id,
+              authId: data.user.id,
+            }
+          );
+
+          if (acceptError) {
+            throw new Error(acceptError);
+          }
+
+          if (acceptData?.data?.businessId) {
+            // Sync onboarding status to localStorage for staff members
+            setOnboardingStatus('completed');
+            router.push(`/pro/dashboard?businessId=${acceptData.data.businessId}`);
+            return;
+          }
+        } catch (inviteErr) {
+          console.error('❌ Error accepting invitation:', inviteErr);
+          setErrors(prev => ({
+            ...prev,
+            email: inviteErr instanceof Error ? inviteErr.message : 'Erreur lors de l\'acceptation de l\'invitation'
+          }));
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Flux normal (sans token d'invitation)
       // Check if user has an existing onboarding status and redirect accordingly
       const onboardingStatus = getOnboardingStatus();
       const redirectPath = getOnboardingPath(onboardingStatus);
 
-      console.log('📍 Redirecting to:', redirectPath, '(status:', onboardingStatus, ')');
       router.push(redirectPath);
 
     } catch (error: any) {
@@ -444,7 +501,7 @@ export default function SignupPage() {
 
                 {/* Login Link */}
                 <Link
-                  href="/auth/login"
+                  href={invitationToken ? `/auth/login?token=${invitationToken}` : "/auth/login"}
                   className="w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 lg:gap-3 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-gray-50 text-gray-900 border-2 border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl font-semibold text-xs sm:text-sm lg:text-base hover:bg-gray-100 hover:border-primary hover:text-primary transition-all duration-300"
                 >
                   Se connecter

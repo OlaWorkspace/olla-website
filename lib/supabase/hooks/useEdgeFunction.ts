@@ -22,45 +22,37 @@ import { supabase } from '@/lib/supabase/clients/browser';
 export function useEdgeFunction() {
   const callFunction = useCallback(async <T = any>(
     functionName: string,
-    payload: Record<string, any>
+    payload: Record<string, any>,
+    options?: { requireAuth?: boolean; method?: 'POST' | 'PATCH' | 'DELETE' }
   ): Promise<{ data: T | null; error: string | null }> => {
     try {
-      // Récupération du token depuis localStorage via getSession()
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const requireAuth = options?.requireAuth !== false; // default: true
 
-      console.log('🔍 Session debug:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        hasToken: !!session?.access_token,
-        sessionError: sessionError,
-        userId: session?.user?.id,
-        tokenPrefix: session?.access_token ? session.access_token.substring(0, 20) + '...' : 'none'
-      });
+      let token: string | null = null;
 
-      const token = session?.access_token;
+      if (requireAuth) {
+        // Récupération du token depuis localStorage via getSession()
+        const { data: { session } } = await supabase.auth.getSession();
 
-      if (!token) {
-        console.error('❌ No access token found - user not authenticated');
-        return {
-          data: null,
-          error: 'Non authentifié - veuillez vous reconnecter'
-        };
+        token = session?.access_token || null;
+
+        if (!token) {
+          return {
+            data: null,
+            error: 'Non authentifié - veuillez vous reconnecter'
+          };
+        }
       }
 
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const functionUrl = `${supabaseUrl}/functions/v1/${functionName}`;
-
-      console.log(`🚀 Calling Edge Function: ${functionName}`, {
-        url: functionUrl,
-        hasToken: !!token,
-        payload
-      });
+      const httpMethod = options?.method || 'POST';
 
       const response = await fetch(functionUrl, {
-        method: 'POST',
+        method: httpMethod,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(payload),
       });
@@ -68,7 +60,6 @@ export function useEdgeFunction() {
       const responseData = await response.json();
 
       if (!response.ok) {
-        console.error(`❌ Edge Function ${functionName} failed:`, responseData);
         return {
           data: null,
           error: responseData?.error || `Function call failed with status ${response.status}`
@@ -76,20 +67,17 @@ export function useEdgeFunction() {
       }
 
       if (responseData?.error) {
-        console.error(`❌ Edge Function ${functionName} returned error:`, responseData.error);
         return {
           data: null,
           error: responseData.error
         };
       }
 
-      console.log(`✅ Edge Function ${functionName} succeeded`);
       return {
         data: responseData?.data || responseData,
         error: null
       };
     } catch (err) {
-      console.error(`❌ Exception calling Edge Function ${functionName}:`, err);
       return {
         data: null,
         error: err instanceof Error ? err.message : 'Unknown error'

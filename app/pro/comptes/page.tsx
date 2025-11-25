@@ -35,6 +35,8 @@ export default function ComptesPage() {
   const [data, setData] = useState<ComptesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Tous les rôles peuvent accéder à leur propre compte
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -119,7 +121,6 @@ export default function ComptesPage() {
 
   const handleSaveProfile = async () => {
     // À implémenter : sauvegarder le profil via une edge function
-    console.log('Saving profile:', formData);
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
