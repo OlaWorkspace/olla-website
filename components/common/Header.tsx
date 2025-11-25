@@ -54,7 +54,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo-fond-bleu.png"
+            src="/icon.svg"
             alt="Olla Logo"
             width={50}
             height={50}

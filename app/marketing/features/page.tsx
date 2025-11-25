@@ -203,12 +203,12 @@ export default function FeaturesPage() {
               </div>
             </div>
 
-            <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] rounded-2xl lg:rounded-3xl overflow-hidden">
+            <div className="relative aspect-square rounded-2xl lg:rounded-3xl overflow-hidden">
               <Image
-                src="/affiche.png"
+                src="/icon.svg"
                 alt="Affiche Olla Fidelite avec QR code et NFC"
                 fill
-                className="object-contain"
+                className="object-cover"
               />
             </div>
           </div>

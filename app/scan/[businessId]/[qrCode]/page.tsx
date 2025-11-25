@@ -110,9 +110,9 @@ export default function ScanFallbackPage() {
         <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
           {/* Logo */}
           <div className="mb-8 flex justify-center">
-            <div className="relative w-24 h-24">
+            <div className="relative w-24 h-24 rounded-xl overflow-hidden">
               <Image
-                src="/logo-fond-bleu.png"
+                src="/icon.svg"
                 alt="OLLA Logo"
                 fill
                 className="object-contain"
