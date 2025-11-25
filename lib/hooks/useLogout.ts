@@ -46,6 +46,17 @@ export function useLogout() {
         console.warn('⚠️ Warning signing out (session may already be expired):', signOutError);
       }
 
+      // Clean up all Supabase-related localStorage keys
+      // (Supabase uses dynamic keys like "sb-<projectid>-auth-token")
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('sb-') || key.startsWith('supabase'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+
       // Redirect to login
       router.push(redirectTo);
     } catch (err) {
