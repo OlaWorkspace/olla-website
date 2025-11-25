@@ -97,14 +97,6 @@ export default function BusinessCreation() {
     e.preventDefault();
     setLoading(true);
 
-    // Debug: Log authentication state
-      authLoading,
-      hasUser: !!user,
-      hasUserProfile: !!userProfile,
-      userId: userProfile?.id,
-      authId: user?.id
-    });
-
     try {
       // Validation
       if (!formData.businessName.trim()) {
