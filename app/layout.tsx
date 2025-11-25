@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/icon.svg",
+        url: "/favicon.png",
         width: 1200,
         height: 630,
         alt: "Olla - La fidélité sans carte",
