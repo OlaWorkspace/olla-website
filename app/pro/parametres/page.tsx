@@ -50,7 +50,7 @@ export default function ParametresPage() {
   // Vérifier l'accès - STAFF n'a pas accès
   useEffect(() => {
     if (!authLoading && userRole === 'STAFF') {
-      console.log('❌ Access denied - redirecting to dashboard');
+      
       router.push('/pro');
     }
   }, [userRole, authLoading, router]);

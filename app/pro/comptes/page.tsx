@@ -121,7 +121,6 @@ export default function ComptesPage() {
 
   const handleSaveProfile = async () => {
     // À implémenter : sauvegarder le profil via une edge function
-    console.log('Saving profile:', formData);
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {

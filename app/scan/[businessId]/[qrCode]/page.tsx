@@ -49,9 +49,9 @@ export default function ScanFallbackPage() {
 
   useEffect(() => {
     // 🔍 DEBUG: Log des paramètres reçus
-    console.log('🔍 WEB DEBUG - businessId reçu:', businessId);
-    console.log('🔍 WEB DEBUG - qrCode reçu:', qrCode);
-    console.log('🔍 WEB DEBUG - params complets:', params);
+    
+    
+    
 
     // Détecter la plateforme
     const userAgent = navigator.userAgent || navigator.vendor;
@@ -66,8 +66,8 @@ export default function ScanFallbackPage() {
     const universalLink = `https://ollafidelite.com/scan/${businessId}/${qrCode}`;
 
     // 🔍 DEBUG: Log des liens générés
-    console.log('🔍 WEB DEBUG - deepLink généré:', deepLink);
-    console.log('🔍 WEB DEBUG - universalLink généré:', universalLink);
+    
+    
 
     // Essayer d'ouvrir l'app (timeout de 1.5s)
     const timeout = setTimeout(() => {

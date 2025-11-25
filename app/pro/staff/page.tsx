@@ -41,7 +41,6 @@ export default function StaffPage() {
   // Vérifier l'accès - STAFF n'a pas accès
   useEffect(() => {
     if (!authLoading && authUserRole === 'STAFF') {
-      console.log('❌ Access denied - redirecting to dashboard');
       router.push('/pro');
     }
   }, [authUserRole, authLoading, router]);
@@ -119,7 +118,6 @@ export default function StaffPage() {
               setPendingInvitations(invitationsData.invitations);
             }
           } catch (invErr) {
-            console.warn('⚠️ Could not load pending invitations:', invErr);
           }
         }
       } catch (err) {
@@ -199,7 +197,7 @@ export default function StaffPage() {
               setPendingInvitations(invitationsData.invitations);
             }
           } catch (err) {
-            console.error('Erreur lors du rafraîchissement des invitations:', err);
+            // Error refreshing invitations:', err);
           }
         }
       }

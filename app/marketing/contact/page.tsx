@@ -24,7 +24,7 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simulating form submission
-    console.log("Form submitted:", formData);
+    
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 5000);
     setFormData({ name: "", email: "", message: "" });

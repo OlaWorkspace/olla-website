@@ -74,7 +74,6 @@ export default function AbonnementsPage() {
   // Vérifier l'accès - seuls OWNER peuvent accéder
   useEffect(() => {
     if (!authLoading && userRole && userRole !== 'OWNER') {
-      console.log('❌ Access denied - redirecting to dashboard');
       router.push('/pro');
     }
   }, [userRole, authLoading, router]);

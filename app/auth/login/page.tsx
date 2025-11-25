@@ -92,12 +92,10 @@ export default function LoginPage() {
       if (signInError) throw signInError;
       if (!data.user) throw new Error('No user returned');
 
-      console.log("✅ Connecté:", data.user.email);
 
       // Si un token d'invitation est présent
       if (invitationToken) {
         try {
-          console.log('📨 Accepting invitation with token...');
 
           // Récupérer le record users
           const { data: userRecord, error: userError } = await supabase
@@ -124,7 +122,6 @@ export default function LoginPage() {
           }
 
           if (acceptData?.data?.businessId) {
-            console.log('✅ Invitation accepted, redirecting to dashboard');
             // Sync onboarding status to localStorage for staff members
             setOnboardingStatus('completed');
             router.push(`/pro/dashboard?businessId=${acceptData.data.businessId}`);

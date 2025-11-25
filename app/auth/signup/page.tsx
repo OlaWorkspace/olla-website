@@ -129,7 +129,6 @@ export default function SignupPage() {
         return;
       }
 
-      console.log('✅ Inscription réussie:', data.user.email);
 
       // Connexion immédiate avec les identifiants (si email confirmation n'est pas requise)
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -138,7 +137,6 @@ export default function SignupPage() {
       });
 
       if (signInError) {
-        console.log('⚠️ Auto sign-in failed (email confirmation may be required):', signInError);
         // Si la confirmation email est requise, rediriger vers une page d'information
         setErrors(prev => ({
           ...prev,
@@ -151,7 +149,6 @@ export default function SignupPage() {
       // Si un token d'invitation est présent
       if (invitationToken) {
         try {
-          console.log('📨 Accepting invitation with token...');
 
           // Attendre que le record users soit créé en base (trigger)
           await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -181,7 +178,6 @@ export default function SignupPage() {
           }
 
           if (acceptData?.data?.businessId) {
-            console.log('✅ Invitation accepted, redirecting to dashboard');
             // Sync onboarding status to localStorage for staff members
             setOnboardingStatus('completed');
             router.push(`/pro/dashboard?businessId=${acceptData.data.businessId}`);
@@ -203,7 +199,6 @@ export default function SignupPage() {
       const onboardingStatus = getOnboardingStatus();
       const redirectPath = getOnboardingPath(onboardingStatus);
 
-      console.log('📍 Redirecting to:', redirectPath, '(status:', onboardingStatus, ')');
       router.push(redirectPath);
 
     } catch (error: any) {
