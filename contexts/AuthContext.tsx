@@ -50,14 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let initialLoadComplete = false;
 
     // Récupération initiale de la session depuis localStorage
-    console.log('🔄 Initializing AuthContext...');
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('📦 Initial session:', !!session, 'error:', error);
       setUser(session?.user ?? null);
       if (session?.user) {
         loadUserProfile(session.user.id);
       } else {
-        console.log('⚠️ No initial session found');
         // Clear cache on logout
         localStorage.removeItem(PROFILE_CACHE_KEY);
         localStorage.removeItem(PROFILE_TIMESTAMP_KEY);
@@ -69,17 +66,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Écoute des changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔐 Auth state changed:', event, 'hasSession:', !!session);
 
         // Ignorer tous les événements jusqu'à ce que le chargement initial soit terminé
         if (!initialLoadComplete) {
-          console.log('⏭️ Skipping auth change - initial load not complete');
           return;
         }
 
         // Ignorer INITIAL_SESSION et SIGNED_IN si on a déjà un user
         if (event === 'INITIAL_SESSION' || (event === 'SIGNED_IN' && user)) {
-          console.log('⏭️ Skipping redundant auth event');
           return;
         }
 
@@ -113,7 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (cachedProfile && cachedTimestamp) {
         const age = Date.now() - parseInt(cachedTimestamp);
         if (age < CACHE_DURATION) {
-          console.log('⚡ Using cached profile (age:', Math.round(age / 1000), 's)');
           const profile = JSON.parse(cachedProfile);
           setUserProfile(profile);
           setError(null);
@@ -121,7 +114,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Refresh in background if cache is older than 1 minute
           if (age > 60 * 1000) {
-            console.log('🔄 Refreshing profile in background...');
             refreshProfileInBackground(userId);
           }
           return;
@@ -129,7 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // 2. No valid cache, load from database
-      console.log('📥 Loading user profile from database for:', userId);
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -143,7 +134,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      console.log('✅ User profile loaded:', data?.pro ? 'Pro' : 'User', data?.admin ? '(Admin)' : '');
 
       // Save to cache
       localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(data));
@@ -174,16 +164,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (response.ok) {
             const result = await response.json();
             if (result.data?.businessId) {
-              console.log('🏢 Setting business from edge function:', result.data.businessId, 'Role:', result.data.role);
               setCurrentBusinessId(result.data.businessId);
               setUserRole(result.data.role || null);
             }
           } else {
-            console.warn('⚠️ Edge function failed:', response.status);
           }
         }
       } catch (err) {
-        console.warn('⚠️ Exception calling edge function:', err);
       }
     } catch (err) {
       console.error('❌ Exception loading user profile:', err);
@@ -238,7 +225,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } catch (err) {
-          console.warn('⚠️ Background refresh of business info failed:', err);
         }
       }
     } catch (err) {
@@ -252,7 +238,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   const refreshProfile = async () => {
     if (user) {
-      console.log('🔄 Manual profile refresh requested');
       // Invalidate cache
       localStorage.removeItem(PROFILE_CACHE_KEY);
       localStorage.removeItem(PROFILE_TIMESTAMP_KEY);

@@ -47,7 +47,6 @@ export default function WelcomeKit() {
         return;
       }
 
-      console.log('🎯 WelcomeKit - Starting onboarding completion...');
 
       // Check if business already exists first
       const { count } = await supabase
@@ -56,7 +55,6 @@ export default function WelcomeKit() {
         .eq('user_id', userProfile.id);
 
       if (count && count > 0) {
-        console.log('✅ WelcomeKit - Business already exists, updating status and redirecting');
 
         // Update onboarding status to completed
         await supabase
@@ -101,14 +99,12 @@ export default function WelcomeKit() {
         }
       );
 
-      console.log('📦 WelcomeKit - Function result:', result);
 
       if (result.error) {
         console.error('❌ WelcomeKit - Error:', result.error);
 
         // If business already exists, just redirect to dashboard
         if (result.error.toLowerCase().includes('already has a business')) {
-          console.log('✅ WelcomeKit - Business already exists, redirecting to /pro');
           showToast('success', 'Redirection vers votre espace...');
           router.push('/pro');
           return;
@@ -121,14 +117,12 @@ export default function WelcomeKit() {
       }
 
       if (result.data && result.data.businessId) {
-        console.log('✅ WelcomeKit - Success! Redirecting to /pro');
         // Clear localStorage since onboarding is completed
         clearOnboardingStatus();
         showToast('success', 'Inscription terminée! Redirection...');
         // Redirect immediately without delay
         router.push('/pro');
       } else {
-        console.log('⚠️ WelcomeKit - No businessId in response');
         showToast('error', 'Une erreur est survenue');
         setLoading(false);
         setIsCompleting(false);

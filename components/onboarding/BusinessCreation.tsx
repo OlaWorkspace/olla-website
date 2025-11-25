@@ -98,7 +98,6 @@ export default function BusinessCreation() {
     setLoading(true);
 
     // Debug: Log authentication state
-    console.log('🔍 BusinessCreation - Auth state:', {
       authLoading,
       hasUser: !!user,
       hasUserProfile: !!userProfile,

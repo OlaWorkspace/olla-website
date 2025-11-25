@@ -68,8 +68,6 @@ export default function Sidebar() {
   const { userProfile, userRole } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Log user role for debugging
-  console.log('👤 Current user role:', userRole, '| User:', userProfile?.user_firstname, userProfile?.user_lastname);
 
   // Générer les initiales pour l'avatar
   const getInitials = () => {
