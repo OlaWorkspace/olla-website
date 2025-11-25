@@ -23,7 +23,7 @@ export function useEdgeFunction() {
   const callFunction = useCallback(async <T = any>(
     functionName: string,
     payload: Record<string, any>,
-    options?: { requireAuth?: boolean }
+    options?: { requireAuth?: boolean; method?: 'POST' | 'PATCH' | 'DELETE' }
   ): Promise<{ data: T | null; error: string | null }> => {
     try {
       const requireAuth = options?.requireAuth !== false; // default: true
@@ -56,16 +56,18 @@ export function useEdgeFunction() {
 
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const functionUrl = `${supabaseUrl}/functions/v1/${functionName}`;
+      const httpMethod = options?.method || 'POST';
 
       console.log(`🚀 Calling Edge Function: ${functionName}`, {
         url: functionUrl,
+        method: httpMethod,
         hasToken: !!token,
         requireAuth,
         payload
       });
 
       const response = await fetch(functionUrl, {
-        method: 'POST',
+        method: httpMethod,
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {}),

@@ -43,7 +43,7 @@ const menuItems: MenuItem[] = [
     label: "Comptes",
     href: "/pro/comptes",
     icon: Users,
-    roles: ['OWNER', 'MANAGER'],
+    roles: ['OWNER', 'MANAGER', 'STAFF'],
   },
   {
     label: "Aide",

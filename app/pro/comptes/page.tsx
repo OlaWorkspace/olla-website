@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import { supabase } from '@/lib/supabase/clients/browser';
@@ -30,21 +29,14 @@ interface ComptesData {
 }
 
 export default function ComptesPage() {
-  const { user, userProfile, userRole, loading: authLoading } = useAuth();
+  const { user, userProfile } = useAuth();
   const { callFunction } = useEdgeFunction();
-  const router = useRouter();
 
   const [data, setData] = useState<ComptesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Vérifier l'accès - seuls OWNER peuvent accéder
-  useEffect(() => {
-    if (!authLoading && userRole && userRole !== 'OWNER') {
-      console.log('❌ Access denied - redirecting to dashboard');
-      router.push('/pro');
-    }
-  }, [userRole, authLoading, router]);
+  // Tous les rôles peuvent accéder à leur propre compte
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
