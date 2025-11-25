@@ -152,6 +152,10 @@ export default function UserDetailPage() {
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   const userBadge = user.admin ? "Admin" : user.pro ? "Professionnel" : "Client";
   const badgeColor = user.admin ? "bg-red-100 text-red-800" : user.pro ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800";
 

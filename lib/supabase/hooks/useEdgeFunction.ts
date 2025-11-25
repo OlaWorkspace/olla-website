@@ -22,29 +22,36 @@ import { supabase } from '@/lib/supabase/clients/browser';
 export function useEdgeFunction() {
   const callFunction = useCallback(async <T = any>(
     functionName: string,
-    payload: Record<string, any>
+    payload: Record<string, any>,
+    options?: { requireAuth?: boolean }
   ): Promise<{ data: T | null; error: string | null }> => {
     try {
-      // Récupération du token depuis localStorage via getSession()
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const requireAuth = options?.requireAuth !== false; // default: true
 
-      console.log('🔍 Session debug:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        hasToken: !!session?.access_token,
-        sessionError: sessionError,
-        userId: session?.user?.id,
-        tokenPrefix: session?.access_token ? session.access_token.substring(0, 20) + '...' : 'none'
-      });
+      let token: string | null = null;
 
-      const token = session?.access_token;
+      if (requireAuth) {
+        // Récupération du token depuis localStorage via getSession()
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (!token) {
-        console.error('❌ No access token found - user not authenticated');
-        return {
-          data: null,
-          error: 'Non authentifié - veuillez vous reconnecter'
-        };
+        console.log('🔍 Session debug:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          hasToken: !!session?.access_token,
+          sessionError: sessionError,
+          userId: session?.user?.id,
+          tokenPrefix: session?.access_token ? session.access_token.substring(0, 20) + '...' : 'none'
+        });
+
+        token = session?.access_token || null;
+
+        if (!token) {
+          console.error('❌ No access token found - user not authenticated');
+          return {
+            data: null,
+            error: 'Non authentifié - veuillez vous reconnecter'
+          };
+        }
       }
 
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -53,6 +60,7 @@ export function useEdgeFunction() {
       console.log(`🚀 Calling Edge Function: ${functionName}`, {
         url: functionUrl,
         hasToken: !!token,
+        requireAuth,
         payload
       });
 
@@ -60,7 +68,7 @@ export function useEdgeFunction() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(payload),
       });

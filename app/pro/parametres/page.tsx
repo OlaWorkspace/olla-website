@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
 import Link from 'next/link';
@@ -37,17 +38,28 @@ interface PlanInfo {
 /**
  * Page de gestion des paramètres pour les professionnels
  * Utilise useAuth() et useEdgeFunction() pour toutes les opérations
+ * Accès: OWNER et MANAGER uniquement
  */
 export default function ParametresPage() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, userRole, loading: authLoading } = useAuth();
   const { callFunction } = useEdgeFunction();
+  const router = useRouter();
 
   const [loading, setLoading] = useState(true);
+
+  // Vérifier l'accès - STAFF n'a pas accès
+  useEffect(() => {
+    if (!authLoading && userRole === 'STAFF') {
+      console.log('❌ Access denied - redirecting to dashboard');
+      router.push('/pro');
+    }
+  }, [userRole, authLoading, router]);
   const [business, setBusiness] = useState<Business | null>(null);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [programs, setPrograms] = useState<LoyaltyProgram[]>([]);
   const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
   const [canAddMore, setCanAddMore] = useState(false);
+  const [pageUserRole, setPageUserRole] = useState<'OWNER' | 'MANAGER' | 'STAFF'>('STAFF');
 
   const [editingBusiness, setEditingBusiness] = useState(false);
   const [editingProgram, setEditingProgram] = useState<string | null>(null);
@@ -71,6 +83,23 @@ export default function ParametresPage() {
     try {
       setLoading(true);
       setError(null);
+
+      // 🆕 Récupérer le rôle et vérifier les droits
+      const { data: staffData } = await callFunction('get-staff-dashboard', {
+        userId: userProfile.id,
+        authId: user.id,
+        businessId: userProfile.default_business_id,
+      });
+
+      if (staffData?.userRole) {
+        setPageUserRole(staffData.userRole);
+        // STAFF ne peut pas accéder aux paramètres
+        if (staffData.userRole === 'STAFF') {
+          setError('Le personnel ne peut pas accéder aux paramètres');
+          setLoading(false);
+          return;
+        }
+      }
 
       // Récupérer le commerce via l'edge function
       const { data: businessData, error: businessError } = await callFunction(

@@ -3,40 +3,59 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Settings, CreditCard, Users, HelpCircle, LifeBuoy, Menu, X } from "lucide-react";
+import { LayoutDashboard, Settings, CreditCard, Users, HelpCircle, LifeBuoy, Menu, X, Users2 } from "lucide-react";
 import LogOutButton from "@/components/common/LogOutButton";
 import { useAuth } from "@/contexts/AuthContext";
 
-const menuItems = [
+interface MenuItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ size?: number }>;
+  roles?: ('OWNER' | 'MANAGER' | 'STAFF')[];
+}
+
+const menuItems: MenuItem[] = [
   {
     label: "Dashboard",
     href: "/pro",
     icon: LayoutDashboard,
+    roles: ['OWNER', 'MANAGER', 'STAFF'],
+  },
+  {
+    label: "Personnel",
+    href: "/pro/staff",
+    icon: Users2,
+    roles: ['OWNER', 'MANAGER'],
   },
   {
     label: "Paramètres",
     href: "/pro/parametres",
     icon: Settings,
+    roles: ['OWNER', 'MANAGER'],
   },
   {
     label: "Abonnements",
     href: "/pro/abonnements",
     icon: CreditCard,
+    roles: ['OWNER'],
   },
   {
     label: "Comptes",
     href: "/pro/comptes",
     icon: Users,
+    roles: ['OWNER', 'MANAGER'],
   },
   {
     label: "Aide",
     href: "/pro/aide",
     icon: HelpCircle,
+    roles: ['OWNER', 'MANAGER', 'STAFF'],
   },
   {
     label: "Support",
     href: "/pro/support",
     icon: LifeBuoy,
+    roles: ['OWNER', 'MANAGER', 'STAFF'],
   },
 ];
 
@@ -46,8 +65,11 @@ const menuItems = [
  */
 export default function Sidebar() {
   const pathname = usePathname();
-  const { userProfile } = useAuth();
+  const { userProfile, userRole } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Log user role for debugging
+  console.log('👤 Current user role:', userRole, '| User:', userProfile?.user_firstname, userProfile?.user_lastname);
 
   // Générer les initiales pour l'avatar
   const getInitials = () => {
@@ -78,6 +100,12 @@ export default function Sidebar() {
 
     return 'Utilisateur';
   };
+
+  // Filtrer les items selon le rôle
+  const visibleItems = menuItems.filter(item => {
+    if (!item.roles || !userRole) return true;
+    return item.roles.includes(userRole);
+  });
 
   return (
     <>
@@ -112,7 +140,17 @@ export default function Sidebar() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{getFullName()}</p>
-              <p className="text-xs text-slate-400">Espace Pro</p>
+              <p className="text-xs text-slate-400">
+                {userRole ? (
+                  <>
+                    {userRole === 'OWNER' && 'Propriétaire'}
+                    {userRole === 'MANAGER' && 'Responsable'}
+                    {userRole === 'STAFF' && 'Personnel'}
+                  </>
+                ) : (
+                  'Espace Pro'
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -120,7 +158,7 @@ export default function Sidebar() {
         {/* Menu */}
         <nav className="flex-1 py-6">
           <ul className="space-y-1 px-3">
-            {menuItems.map((item) => {
+            {visibleItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || (item.href !== "/pro" && pathname.startsWith(item.href));
 

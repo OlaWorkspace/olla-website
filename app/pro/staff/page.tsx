@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEdgeFunction } from '@/lib/supabase/hooks/useEdgeFunction';
+import { Clock, CheckCircle, Mail, Trash2 } from 'lucide-react';
 
 interface StaffMember {
   id: string;
@@ -14,15 +16,34 @@ interface StaffMember {
   isCurrentUser?: boolean;
 }
 
+interface PendingInvitation {
+  id: string;
+  email: string;
+  role: 'MANAGER' | 'STAFF';
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+  expiresAt: string;
+}
+
 export default function StaffPage() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, userRole: authUserRole, loading: authLoading } = useAuth();
   const { callFunction } = useEdgeFunction();
+  const router = useRouter();
 
   const [members, setMembers] = useState<StaffMember[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<'OWNER' | 'MANAGER' | 'STAFF'>('STAFF');
+  const [pageUserRole, setPageUserRole] = useState<'OWNER' | 'MANAGER' | 'STAFF'>('STAFF');
   const [businessId, setBusinessId] = useState<string | null>(null);
+
+  // Vérifier l'accès - STAFF n'a pas accès
+  useEffect(() => {
+    if (!authLoading && authUserRole === 'STAFF') {
+      console.log('❌ Access denied - redirecting to dashboard');
+      router.push('/pro');
+    }
+  }, [authUserRole, authLoading, router]);
 
   // Modal states
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -34,7 +55,7 @@ export default function StaffPage() {
   const [selectedMember, setSelectedMember] = useState<StaffMember | null>(null);
   const [newRole, setNewRole] = useState<'MANAGER' | 'STAFF'>('STAFF');
 
-  // Fetch staff data on mount
+  // Fetch staff data and pending invitations on mount
   useEffect(() => {
     const fetchStaffData = async () => {
       if (!user || !userProfile) {
@@ -61,13 +82,30 @@ export default function StaffPage() {
             setMembers(staffData.members);
           }
           if (staffData.userRole) {
-            setUserRole(staffData.userRole);
+            setPageUserRole(staffData.userRole);
           }
           if (staffData.business?.id) {
             setBusinessId(staffData.business.id);
           }
         } else {
           setError('Aucune donnée retournée');
+        }
+
+        // Charger les invitations en attente pour ce business
+        if (staffData?.business?.id) {
+          try {
+            const { data: invitationsData, error: invitationsError } = await callFunction('list-pending-invitations', {
+              userId: userProfile.id,
+              authId: user.id,
+              businessId: staffData.business.id,
+            });
+
+            if (!invitationsError && invitationsData?.invitations) {
+              setPendingInvitations(invitationsData.invitations);
+            }
+          } catch (invErr) {
+            console.warn('⚠️ Could not load pending invitations:', invErr);
+          }
         }
       } catch (err) {
         console.error('❌ Error fetching staff:', err);
@@ -80,7 +118,7 @@ export default function StaffPage() {
     fetchStaffData();
   }, [user, userProfile, callFunction]);
 
-  const canManageStaff = userRole === 'OWNER' || userRole === 'MANAGER';
+  const canManageStaff = pageUserRole === 'OWNER' || pageUserRole === 'MANAGER';
 
   const handleInvite = async () => {
     if (!inviteEmail.trim() || !businessId) {
@@ -230,7 +268,7 @@ export default function StaffPage() {
       )}
 
       {/* Warning for STAFF */}
-      {userRole === 'STAFF' && (
+      {pageUserRole === 'STAFF' && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
           <p className="text-yellow-800 text-sm">
             Vous avez accès en lecture seule en tant que personnel
@@ -238,9 +276,69 @@ export default function StaffPage() {
         </div>
       )}
 
+      {/* Pending Invitations Section */}
+      {pendingInvitations.length > 0 && (
+        <div className="bg-white border border-slate-200 rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+            <Clock size={20} className="text-blue-600" />
+            Invitations en attente ({pendingInvitations.length})
+          </h2>
+
+          <div className="grid gap-4">
+            {pendingInvitations.map((invitation) => (
+              <div
+                key={invitation.id}
+                className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-slate-50 border border-blue-200 rounded-lg hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
+                    <Mail size={20} className="text-blue-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-900 truncate">{invitation.email}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span
+                        className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                          invitation.role === 'MANAGER'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
+                        {invitation.role === 'MANAGER' ? 'Responsable' : 'Personnel'}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        Expire le {new Date(invitation.expiresAt).toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 ml-4">
+                  <span className="flex items-center gap-1 text-xs text-blue-600 font-medium px-3 py-1 bg-blue-100 rounded-full">
+                    <Clock size={14} />
+                    En attente
+                  </span>
+                  {canManageStaff && (
+                    <button
+                      onClick={() => {
+                        // TODO: Implement cancel invitation
+                      }}
+                      className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                      title="Annuler l'invitation"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Members Card */}
-      <div className="bg-white border border-slate-200 rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-slate-900 mb-6">
+      <div className="bg-white border border-slate-200 rounded-xl p-6">
+        <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+          <CheckCircle size={20} className="text-green-600" />
           Membres de l'équipe ({members.length})
         </h2>
 
@@ -253,18 +351,23 @@ export default function StaffPage() {
             {members.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between py-4 px-2 hover:bg-slate-50 transition"
+                className="flex items-center justify-between py-4 px-3 hover:bg-slate-50/50 transition-colors rounded"
               >
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900">
-                    {member.firstName} {member.lastName}
-                    {member.isCurrentUser && <span className="text-slate-500 font-normal ml-2">(Vous)</span>}
-                  </p>
-                  <p className="text-sm text-slate-600">{member.email}</p>
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-semibold text-sm">
+                    {member.firstName?.[0]}{member.lastName?.[0]}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">
+                      {member.firstName} {member.lastName}
+                      {member.isCurrentUser && <span className="text-slate-500 font-normal ml-2 text-sm">(Vous)</span>}
+                    </p>
+                    <p className="text-sm text-slate-600">{member.email}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
                       member.role === 'OWNER'
                         ? 'bg-yellow-100 text-yellow-800'
                         : member.role === 'MANAGER'
@@ -286,13 +389,13 @@ export default function StaffPage() {
                           setNewRole(member.role === 'MANAGER' ? 'STAFF' : 'MANAGER');
                           setShowRoleModal(true);
                         }}
-                        className="text-blue-600 hover:text-blue-700 font-medium text-sm px-3 py-1 hover:bg-blue-50 rounded transition"
+                        className="text-blue-600 hover:text-blue-700 font-medium text-sm px-3 py-1.5 hover:bg-blue-50 rounded-lg transition"
                       >
                         Modifier
                       </button>
                       <button
                         onClick={() => handleRemove(member.id)}
-                        className="text-red-600 hover:text-red-700 font-medium text-sm px-3 py-1 hover:bg-red-50 rounded transition"
+                        className="text-red-600 hover:text-red-700 font-medium text-sm px-3 py-1.5 hover:bg-red-50 rounded-lg transition"
                       >
                         Supprimer
                       </button>
@@ -307,11 +410,12 @@ export default function StaffPage() {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Inviter un membre</h2>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <h2 className="text-2xl font-semibold text-slate-900 mb-2">Inviter un membre</h2>
+            <p className="text-slate-600 text-sm mb-6">Ajoutez une nouvelle personne à votre équipe</p>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
                 <input
@@ -319,7 +423,7 @@ export default function StaffPage() {
                   placeholder="email@example.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 />
               </div>
 
@@ -328,26 +432,26 @@ export default function StaffPage() {
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as 'MANAGER' | 'STAFF')}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 >
-                  {userRole === 'OWNER' && (
-                    <option value="MANAGER">Responsable</option>
+                  {pageUserRole === 'OWNER' && (
+                    <option value="MANAGER">Responsable - Peut gérer le personnel</option>
                   )}
-                  <option value="STAFF">Personnel</option>
+                  <option value="STAFF">Personnel - Accès basique</option>
                 </select>
               </div>
 
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={() => setShowInviteModal(false)}
-                  className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition font-medium"
+                  className="flex-1 px-4 py-3 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition font-medium"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleInvite}
                   disabled={inviteLoading || !inviteEmail.trim()}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 transition font-medium"
+                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium"
                 >
                   {inviteLoading ? 'Invitation...' : 'Inviter'}
                 </button>
@@ -359,44 +463,44 @@ export default function StaffPage() {
 
       {/* Role Modal */}
       {showRoleModal && selectedMember && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Modifier le rôle</h2>
-            <p className="text-slate-600 text-sm mb-4">
-              Rôle de {selectedMember.firstName} {selectedMember.lastName}
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <h2 className="text-2xl font-semibold text-slate-900 mb-2">Modifier le rôle</h2>
+            <p className="text-slate-600 text-sm mb-6">
+              Changer le rôle de <strong>{selectedMember.firstName} {selectedMember.lastName}</strong>
             </p>
 
-            <div className="space-y-3 mb-6">
-              {userRole === 'OWNER' && (
-                <label className="flex items-center p-3 border-2 border-slate-200 rounded-lg cursor-pointer hover:border-slate-300 transition"
-                  style={{ borderColor: newRole === 'MANAGER' ? '#3b82f6' : undefined, backgroundColor: newRole === 'MANAGER' ? '#f0f4ff' : undefined }}>
+            <div className="space-y-3 mb-8">
+              {pageUserRole === 'OWNER' && (
+                <label className="flex items-center p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-slate-300 transition"
+                  style={{ borderColor: newRole === 'MANAGER' ? '#3b82f6' : undefined, backgroundColor: newRole === 'MANAGER' ? '#eff6ff' : undefined }}>
                   <input
                     type="radio"
                     name="role"
                     value="MANAGER"
                     checked={newRole === 'MANAGER'}
                     onChange={(e) => setNewRole(e.target.value as 'MANAGER')}
-                    className="mr-3"
+                    className="mr-3 w-4 h-4"
                   />
                   <div>
-                    <div className="font-medium text-slate-900">Responsable</div>
-                    <div className="text-xs text-slate-600">Peut gérer le personnel</div>
+                    <div className="font-semibold text-slate-900">Responsable</div>
+                    <div className="text-xs text-slate-600">Peut gérer le personnel et les paramètres</div>
                   </div>
                 </label>
               )}
-              <label className="flex items-center p-3 border-2 border-slate-200 rounded-lg cursor-pointer hover:border-slate-300 transition"
-                style={{ borderColor: newRole === 'STAFF' ? '#3b82f6' : undefined, backgroundColor: newRole === 'STAFF' ? '#f0f4ff' : undefined }}>
+              <label className="flex items-center p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-slate-300 transition"
+                style={{ borderColor: newRole === 'STAFF' ? '#3b82f6' : undefined, backgroundColor: newRole === 'STAFF' ? '#eff6ff' : undefined }}>
                 <input
                   type="radio"
                   name="role"
                   value="STAFF"
                   checked={newRole === 'STAFF'}
                   onChange={(e) => setNewRole(e.target.value as 'STAFF')}
-                  className="mr-3"
+                  className="mr-3 w-4 h-4"
                 />
                 <div>
-                  <div className="font-medium text-slate-900">Personnel</div>
-                  <div className="text-xs text-slate-600">Accès basique seulement</div>
+                  <div className="font-semibold text-slate-900">Personnel</div>
+                  <div className="text-xs text-slate-600">Accès au dashboard uniquement</div>
                 </div>
               </label>
             </div>
@@ -404,13 +508,13 @@ export default function StaffPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowRoleModal(false)}
-                className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition font-medium"
+                className="flex-1 px-4 py-3 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition font-medium"
               >
                 Annuler
               </button>
               <button
                 onClick={handleUpdateRole}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium"
               >
                 Mettre à jour
               </button>

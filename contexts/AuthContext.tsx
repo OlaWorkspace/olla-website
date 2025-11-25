@@ -16,6 +16,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isPro: boolean;
   isAdmin: boolean;
+  userRole: 'OWNER' | 'MANAGER' | 'STAFF' | null;
+  currentBusinessId: string | null;
+  setCurrentBusinessId: (businessId: string | null) => void;
   refreshProfile: () => Promise<void>;
 }
 
@@ -35,6 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<'OWNER' | 'MANAGER' | 'STAFF' | null>(null);
+  const [currentBusinessId, setCurrentBusinessId] = useState<string | null>(null);
 
   // Cache keys
   const PROFILE_CACHE_KEY = 'olla_user_profile';
@@ -146,6 +151,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUserProfile(data);
       setError(null);
+
+      // Load business and role from edge function
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-get-auth-user`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                userId: data.id,
+                authId: userId,
+              }),
+            }
+          );
+
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data?.businessId) {
+              console.log('🏢 Setting business from edge function:', result.data.businessId, 'Role:', result.data.role);
+              setCurrentBusinessId(result.data.businessId);
+              setUserRole(result.data.role || null);
+            }
+          } else {
+            console.warn('⚠️ Edge function failed:', response.status);
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Exception calling edge function:', err);
+      }
     } catch (err) {
       console.error('❌ Exception loading user profile:', err);
       setError(err instanceof Error ? err.message : 'Failed to load profile');
@@ -170,11 +209,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(data));
         localStorage.setItem(PROFILE_TIMESTAMP_KEY, Date.now().toString());
         setUserProfile(data);
+
+        // Also refresh business info from edge function
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.access_token) {
+            const response = await fetch(
+              `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/web-get-auth-user`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                  userId: data.id,
+                  authId: (await supabase.auth.getUser()).data.user?.id,
+                }),
+              }
+            );
+
+            if (response.ok) {
+              const result = await response.json();
+              if (result.data?.businessId) {
+                setCurrentBusinessId(result.data.businessId);
+                setUserRole(result.data.role || null);
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('⚠️ Background refresh of business info failed:', err);
+        }
       }
     } catch (err) {
       console.error('⚠️ Background refresh failed:', err);
     }
   };
+
 
   /**
    * Public function to refresh profile (call after creating/updating data)
@@ -200,6 +271,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         isPro: userProfile?.pro || false,
         isAdmin: userProfile?.admin || false,
+        userRole,
+        currentBusinessId,
+        setCurrentBusinessId,
         refreshProfile,
       }}
     >
