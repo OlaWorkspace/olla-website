@@ -77,6 +77,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        // Handle logout event explicitly
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setUserProfile(null);
+          setUserRole(null);
+          setCurrentBusinessId(null);
+          // Clear cache on logout
+          localStorage.removeItem(PROFILE_CACHE_KEY);
+          localStorage.removeItem(PROFILE_TIMESTAMP_KEY);
+          setLoading(false);
+          return;
+        }
+
         setUser(session?.user ?? null);
 
         if (session?.user) {
