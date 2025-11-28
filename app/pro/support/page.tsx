@@ -17,10 +17,10 @@ export default function SupportPage() {
           <h3 className="text-xl font-bold text-slate-900 mb-2">Email</h3>
           <p className="text-slate-600 mb-4">Nous répondons en maximum 24h</p>
           <a
-            href="mailto:support@olla.app"
+            href="mailto:support@ollafidelite.com"
             className="text-blue-600 hover:text-blue-700 font-semibold"
           >
-            support@olla.app
+            support@ollafidelite.com
           </a>
         </div>
 
@@ -43,7 +43,7 @@ export default function SupportPage() {
             href="tel:+33123456789"
             className="text-orange-600 hover:text-orange-700 font-semibold"
           >
-            +33 1 23 45 67 89
+            +33 6 52 21 13 52
           </a>
         </div>
       </div>
